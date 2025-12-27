@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>Payslip View</title>
+</head>
+<body>
+
+<div layout:fragment="content">
+
+    <div class="container" style="max-width: 800px;">
+        <div class="d-flex justify-content-between mb-3 d-print-none">
+            <a th:href="@{/payslips}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-2"></i> Back to List
+            </a>
+            <button onclick="window.print()" class="btn btn-primary">
+                <i class="bi bi-printer-fill me-2"></i> Print Payslip
+            </button>
+        </div>
+
+        <div class="card shadow-lg border-0">
+            <div class="card-body p-5">
+
+                <div class="d-flex justify-content-between align-items-center border-bottom pb-4 mb-4">
+                    <div>
+                        <h2 class="fw-bold text-dark m-0">DG5 HRMS</h2>
+                        <small class="text-muted">Salary Slip / Statement of Earnings</small>
+                    </div>
+                    <div class="text-end">
+                        <h5 class="fw-bold m-0 text-primary">PAID</h5>
+                        <div class="text-muted small">Date: <span th:text="${payslip.payDate}"></span></div>
+                        <div class="text-muted small">Ref #: <span th:text="${payslip.id}"></span></div>
+                    </div>
+                </div>
+
+                <div class="row mb-5">
+                    <div class="col-md-6">
+                        <h6 class="text-uppercase text-secondary fw-bold small">Employee Details</h6>
+                        <div class="fs-5 fw-bold" th:text="${payslip.employee.firstName + ' ' + payslip.employee.lastName}"></div>
+                        <div class="text-muted" th:text="${payslip.employee.position}"></div>
+                        <div class="text-muted" th:text="${payslip.employee.department != null ? payslip.employee.department.name : '-'}"></div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <table class="table table-borderless">
+                            <thead class="border-bottom">
+                            <tr>
+                                <th class="ps-0">Earnings</th>
+                                <th class="text-end pe-0">Amount</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td class="ps-0">Basic Salary</td>
+                                <td class="text-end pe-0" th:text="${#numbers.formatCurrency(payslip.basePay)}"></td>
+                            </tr>
+                            <tr>
+                                <td class="ps-0">Bonus / Incentives</td>
+                                <td class="text-end pe-0 text-success" th:text="${#numbers.formatCurrency(payslip.bonus)}"></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="col-md-6">
+                        <table class="table table-borderless">
+                            <thead class="border-bottom">
+                            <tr>
+                                <th class="ps-0">Deductions</th>
+                                <th class="text-end pe-0">Amount</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td class="ps-0">Tax</td>
+                                <td class="text-end pe-0 text-danger" th:text="${#numbers.formatCurrency(payslip.tax)}"></td>
+                            </tr>
+                            <tr th:if="${payslip.loanDeduction > 0}">
+                                <td class="ps-0">Loan Repayment</td>
+                                <td class="text-end pe-0 text-danger" th:text="${#numbers.formatCurrency(payslip.loanDeduction)}"></td>
+                            </tr>
+                            <tr>
+                                <td class="ps-0">Other Deductions</td>
+                                <td class="text-end pe-0 text-danger"
+                                    th:text="${#numbers.formatCurrency(payslip.totalDeductions.subtract(payslip.tax).subtract(payslip.loanDeduction))}">
+                                </td>
+                            </tr>
+                            <tr class="border-top">
+                                <td class="ps-0 fw-bold">Total Deductions</td>
+                                <td class="text-end pe-0 fw-bold text-danger" th:text="${'- ' + #numbers.formatCurrency(payslip.totalDeductions)}"></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="bg-light p-3 rounded mt-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="m-0 fw-bold text-secondary">NET PAYABLE</h5>
+                        <h3 class="m-0 fw-bold text-primary" th:text="${#numbers.formatCurrency(payslip.netPay)}"></h3>
+                    </div>
+                </div>
+
+                <div class="mt-5 text-center text-muted small">
+                    <p>This is a system generated payslip. No signature required.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

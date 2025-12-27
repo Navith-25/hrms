@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>System Reset</title>
+</head>
+<body>
+
+<div layout:fragment="content">
+    <div class="d-flex align-items-center justify-content-center" style="min-height: 70vh;">
+        <div class="card border-danger shadow-lg" style="max-width: 600px;">
+            <div class="card-header bg-danger text-white text-center py-3">
+                <h3 class="mb-0 fw-bold"><i class="bi bi-exclamation-triangle-fill me-2"></i> DANGER ZONE</h3>
+            </div>
+            <div class="card-body p-5 text-center">
+                <h4 class="text-dark fw-bold mb-3">Confirm System Reset</h4>
+                <p class="text-secondary mb-4">
+                    You are about to <strong>PERMANENTLY DELETE</strong> all transactional data.
+                    <br>This action cannot be undone.
+                </p>
+
+                <div class="alert alert-warning text-start d-inline-block">
+                    <ul class="mb-0">
+                        <li>All Payroll Records & Salary Settings</li>
+                        <li>All Loan Requests & History</li>
+                        <li>All Leave Requests & Approvals</li>
+                        <li>All Tasks, Messages & Attendance Logs</li>
+                        <li>Performance Reviews & Training Assignments</li>
+                    </ul>
+                </div>
+
+                <p class="text-muted mt-3 small">
+                    * Employee accounts and Department structures will <strong>NOT</strong> be deleted.
+                </p>
+
+                <form th:action="@{/admin/system/reset}" method="post" class="mt-4">
+                    <div class="d-flex justify-content-center gap-3">
+                        <a th:href="@{/}" class="btn btn-outline-secondary btn-lg">Cancel</a>
+                        <button type="submit" class="btn btn-danger btn-lg fw-bold"
+                                onclick="return confirm('FINAL WARNING: Are you absolutely sure?');">
+                            <i class="bi bi-trash-fill me-2"></i> Reset System Data
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

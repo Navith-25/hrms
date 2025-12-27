@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>Department Trainings</title>
+</head>
+<body>
+
+<div layout:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="fw-bold m-0">Department Training Programs</h3>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4">Training Title</th>
+                        <th>Dates</th>
+                        <th>Description</th>
+                        <th class="text-end pe-4">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${#lists.isEmpty(trainings)}">
+                        <td colspan="4" class="text-center py-5 text-muted">
+                            No training programs available for your department.
+                        </td>
+                    </tr>
+                    <tr th:each="t : ${trainings}">
+                        <td class="ps-4 fw-bold text-primary" th:text="${t.title}"></td>
+                        <td>
+                            <small class="text-muted d-block">Start: <span th:text="${t.startDate}"></span></small>
+                            <small class="text-muted d-block">End: <span th:text="${t.endDate}"></span></small>
+                        </td>
+                        <td th:text="${t.description}" class="text-secondary small"></td>
+                        <td class="text-end pe-4">
+                            <a th:href="@{/manager/training/assign/{id}(id=${t.id})}" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-person-check-fill me-1"></i> Assign Employees
+                            </a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

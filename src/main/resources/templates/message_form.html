@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns:sec="http://www.w3.org/1999/xhtml"
+      layout:decorate="~{layout}">
+<head>
+    <title>Compose Message</title>
+</head>
+<body>
+
+<div layout:fragment="content">
+    <div class="container" style="max-width: 800px;">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white py-3">
+                <h5 class="mb-0 fw-bold"><i class="bi bi-pencil-square me-2"></i> Compose Message</h5>
+            </div>
+            <div class="card-body p-4">
+                <form th:action="@{/messages/send}" method="post">
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-secondary">Recipient</label>
+                        <select name="recipientId" class="form-select">
+                            <option value="" selected>-- Select Employee --</option>
+                            <option th:each="emp : ${employees}"
+                                    th:value="${emp.id}"
+                                    th:text="${emp.firstName + ' ' + emp.lastName + ' - ' + emp.position}">
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="mb-4 d-flex gap-3">
+                        <div class="form-check" sec:authorize="hasAnyRole('ADMIN', 'HR_MANAGER', 'DIRECTOR')">
+                            <input class="form-check-input" type="checkbox" name="sendToAll" id="sendAll">
+                            <label class="form-check-label text-danger fw-bold" for="sendAll">
+                                <i class="bi bi-megaphone-fill me-1"></i> Send to ALL
+                            </label>
+                        </div>
+
+                        <div class="form-check" sec:authorize="hasRole('MANAGER')">
+                            <input class="form-check-input" type="checkbox" name="sendToDept" id="sendDept">
+                            <label class="form-check-label text-info fw-bold" for="sendDept">
+                                <i class="bi bi-people-fill me-1"></i> Department Team
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-secondary">Subject</label>
+                        <input type="text" name="subject" class="form-control" placeholder="Message subject..." required>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold text-secondary">Message Content</label>
+                        <textarea name="content" class="form-control" rows="6" placeholder="Type your message here..." required></textarea>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a th:href="@{/messages}" class="btn btn-outline-secondary">Discard</a>
+                        <button type="submit" class="btn btn-primary px-4">
+                            <i class="bi bi-send-fill me-2"></i> Send Message
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

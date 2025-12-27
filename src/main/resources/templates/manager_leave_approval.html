@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>Leave Approvals</title>
+</head>
+<body>
+
+<div layout:fragment="content">
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-white py-3">
+            <h5 class="mb-0 fw-bold">Pending Leave Requests</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Employee</th>
+                        <th>Dates</th>
+                        <th>Reason</th>
+                        <th class="text-end pe-4">Decision</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${#lists.isEmpty(pendingRequests)}">
+                        <td colspan="4" class="text-center py-5">
+                            <i class="bi bi-check-circle text-muted display-4 d-block mb-3"></i>
+                            <span class="text-muted">All caught up! No pending requests.</span>
+                        </td>
+                    </tr>
+                    <tr th:each="request : ${pendingRequests}">
+                        <td class="ps-4">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-light rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px; color: #4f46e5; font-weight: bold;">
+                                    <span th:text="${#strings.substring(request.employee.firstName,0,1)}"></span>
+                                </div>
+                                <div>
+                                    <div class="fw-bold" th:text="${request.employee.firstName + ' ' + request.employee.lastName}"></div>
+                                    <small class="text-muted" th:text="${request.employee.position}"></small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="small">
+                                <span class="fw-bold">From:</span> <span th:text="${request.startDate}"></span><br>
+                                <span class="fw-bold">To:</span> <span th:text="${request.endDate}"></span>
+                            </div>
+                        </td>
+                        <td>
+                            <p class="mb-0 text-muted small" style="max-width: 300px;" th:text="${request.reason}"></p>
+                        </td>
+                        <td class="text-end pe-4">
+                            <div class="d-flex justify-content-end gap-2">
+                                <form th:action="@{/manager/leave/approve/{id}(id=${request.id})}" method="POST">
+                                    <button type="submit" class="btn btn-sm btn-success" title="Approve">
+                                        <i class="bi bi-check-lg"></i> Approve
+                                    </button>
+                                </form>
+
+                                <form th:action="@{/manager/leave/reject/{id}(id=${request.id})}" method="POST">
+                                    <button type="submit" class="btn btn-sm btn-danger" title="Reject">
+                                        <i class="bi bi-x-lg"></i> Reject
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

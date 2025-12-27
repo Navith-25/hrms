@@ -1,0 +1,114 @@
+package com.nibm.hr.hrms.config;
+
+import com.nibm.hr.hrms.security.CustomUserDetailsService;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+
+@Configuration
+@EnableWebSecurity
+public class SecurityConfig {
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public DaoAuthenticationProvider authenticationProvider(CustomUserDetailsService userDetailsService) {
+        DaoAuthenticationProvider auth = new DaoAuthenticationProvider();
+        auth.setUserDetailsService(userDetailsService);
+        auth.setPasswordEncoder(passwordEncoder());
+        return auth;
+    }
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http.authorizeHttpRequests(authorize -> authorize
+                        // 1. Static Resources & Login (Always Allow)
+                        .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**", "/login", "/register").permitAll()
+
+                        // 2. API Endpoints (CRITICAL FOR CALENDAR)
+                        .requestMatchers("/api/**").authenticated()
+
+                        // 3. Dashboard Access (Everyone logged in)
+                        .requestMatchers("/").hasAnyRole("ADMIN", "HR_MANAGER", "HR_STAFF", "FINANCE", "DIRECTOR", "MANAGER", "EMPLOYEE")
+
+                        // 4. Messaging
+                        .requestMatchers("/messages/**").authenticated()
+
+                        // 5. System Reset (Admin Only)
+                        .requestMatchers("/admin/system/**").hasRole("ADMIN")
+
+                        // 6. Loan Management
+                        .requestMatchers("/loan/request", "/loan/save").hasRole("EMPLOYEE")
+                        .requestMatchers("/finance/loans/**", "/finance/loan/**").hasAnyRole("FINANCE", "HR_MANAGER", "DIRECTOR", "MANAGER")
+
+                        // 7. Attendance & Calendar Pages
+                        .requestMatchers("/admin/attendance/**").hasRole("HR_STAFF")
+                        .requestMatchers("/my-calendar").authenticated()
+
+                        // 8. Training Module
+                        .requestMatchers("/admin/training/**").hasRole("DIRECTOR")
+                        .requestMatchers("/manager/training/**").hasAnyRole("MANAGER", "HR_MANAGER")
+                        .requestMatchers("/employee/trainings").hasRole("EMPLOYEE")
+
+                        // 9. Specific GET Rules (Viewing Forms)
+                        .requestMatchers(HttpMethod.GET, "/showNewEmployeeForm", "/showFormForUpdate/**")
+                        .hasAnyRole("HR_STAFF", "ADMIN", "HR_MANAGER", "DIRECTOR")
+
+                        .requestMatchers(HttpMethod.GET, "/admin/leave")
+                        .hasAnyRole("HR_STAFF", "ADMIN", "HR_MANAGER", "DIRECTOR")
+
+                        .requestMatchers(HttpMethod.GET, "/admin/performance/list/**")
+                        .hasAnyRole("HR_STAFF", "ADMIN", "HR_MANAGER", "DIRECTOR")
+
+                        // 10. Admin Actions (Saving/Deleting)
+                        .requestMatchers(HttpMethod.POST, "/admin/employee/saveNew", "/admin/employee/update")
+                        .hasAnyRole("ADMIN", "HR_MANAGER", "HR_STAFF", "DIRECTOR")
+
+                        .requestMatchers(HttpMethod.POST, "/deleteEmployee/**")
+                        .hasAnyRole("ADMIN", "HR_MANAGER", "DIRECTOR")
+
+                        // 11. Admin Sub-Modules
+                        .requestMatchers("/admin/performance/**").hasAnyRole("ADMIN", "HR_MANAGER", "HR_STAFF", "DIRECTOR")
+                        .requestMatchers("/admin/payroll/**").hasAnyRole("ADMIN", "HR_MANAGER", "FINANCE", "DIRECTOR")
+                        .requestMatchers("/admin/leave/**").hasAnyRole("ADMIN", "HR_MANAGER", "HR_STAFF", "DIRECTOR")
+                        .requestMatchers("/admin/reports/**", "/admin/report/**").hasAnyRole("ADMIN", "DIRECTOR")
+
+                        // 12. Manager & Employee Specifics
+                        .requestMatchers("/manager/tasks/**").hasAnyRole("MANAGER", "HR_MANAGER", "ADMIN", "DIRECTOR")
+                        .requestMatchers("/manager/team", "/manager/leave", "/manager/performance/**").hasAnyRole("MANAGER", "HR_MANAGER")
+                        .requestMatchers(HttpMethod.POST, "/manager/leave/approve/**", "/manager/leave/reject/**").hasAnyRole("MANAGER", "HR_MANAGER")
+
+                        .requestMatchers("/leave", "/leave/request", "/payslips", "/performance", "/employee/tasks/**").hasRole("EMPLOYEE")
+                        .requestMatchers(HttpMethod.GET, "/payslip/{id}").hasAnyRole("EMPLOYEE", "ADMIN", "HR_MANAGER", "DIRECTOR", "FINANCE")
+
+                        // 13. General Catch-All
+                        .requestMatchers("/admin/**").hasAnyRole("ADMIN", "DIRECTOR")
+                        .anyRequest().authenticated()
+                )
+                .formLogin(form -> form
+                        .loginPage("/login")
+                        .loginProcessingUrl("/login")
+                        .defaultSuccessUrl("/", true)
+                        .permitAll()
+                )
+                .logout(logout -> logout
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/login?logout")
+                        .invalidateHttpSession(true)
+                        .deleteCookies("JSESSIONID")
+                        .permitAll()
+                )
+                .csrf(csrf -> csrf.disable());
+
+        return http.build();
+    }
+}

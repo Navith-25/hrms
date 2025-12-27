@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>My Calendar</title>
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
+
+    <style>
+        #calendar {
+            max-width: 100%;
+            margin: 0 auto;
+            min-height: 700px;
+        }
+        .fc-event {
+            cursor: pointer;
+        }
+        .fc-toolbar-title {
+            font-size: 1.5rem !important;
+        }
+    </style>
+</head>
+<body>
+
+<div layout:fragment="content">
+    <div class="container-fluid">
+
+        <div class="d-sm-flex align-items-center justify-content-between mb-4">
+            <h1 class="h3 mb-0 text-gray-800">My Calendar</h1>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm p-3">
+                    <div class="d-flex flex-wrap gap-3">
+                        <div class="d-flex align-items-center"><span class="badge rounded-pill bg-success me-2">&nbsp;</span> Attendance</div>
+                        <div class="d-flex align-items-center"><span class="badge rounded-pill bg-primary me-2">&nbsp;</span> Payroll</div>
+                        <div class="d-flex align-items-center"><span class="badge rounded-pill bg-warning text-dark me-2">&nbsp;</span> Leave</div>
+                        <div class="d-flex align-items-center"><span class="badge rounded-pill me-2" style="background-color: #6f42c1;">&nbsp;</span> Tasks</div>
+                        <div class="d-flex align-items-center"><span class="badge rounded-pill me-2" style="background-color: #0dcaf0;">&nbsp;</span> Training</div>
+
+                        <div class="d-flex align-items-center"><span class="badge rounded-pill me-2" style="background-color: #20c997;">&nbsp;</span> Loans</div>
+                        <div class="d-flex align-items-center"><span class="badge rounded-pill me-2" style="background-color: #fd7e14;">&nbsp;</span> Reviews</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow mb-4">
+            <div class="card-body">
+                <div id='calendar'></div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var calendarEl = document.getElementById('calendar');
+
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                themeSystem: 'bootstrap5',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,listWeek'
+                },
+
+                // Fetch events from Backend API
+                events: {
+                    url: '/api/calendar/events',
+                    failure: function() {
+                        alert('There was an error while fetching events!');
+                    }
+                },
+
+                navLinks: true,
+                editable: false,
+                dayMaxEvents: true,
+
+                // --- EVENT CLICK HANDLER (Displays Details) ---
+                eventClick: function(info) {
+                    // Prevent default action (like following a link)
+                    info.jsEvent.preventDefault();
+
+                    // Basic Info
+                    let msg = 'Event: ' + info.event.title;
+
+                    if(info.event.start) {
+                        msg += '\nStart: ' + info.event.start.toLocaleDateString();
+                    }
+                    if(info.event.end) {
+                        msg += '\nEnd: ' + info.event.end.toLocaleDateString();
+                    }
+
+                    // --- SHOW FULL DETAILS FROM BACKEND ---
+                    // FullCalendar puts the custom 'description' field inside 'extendedProps'
+                    if (info.event.extendedProps.description) {
+                        msg += '\n\n-------------------------\nDETAILS:\n' + info.event.extendedProps.description;
+                    }
+
+                    alert(msg);
+                },
+
+                // Customize how time is displayed
+                eventTimeFormat: {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    meridiem: 'short'
+                }
+            });
+
+            calendar.render();
+        });
+    </script>
+</div>
+
+</body>
+</html>

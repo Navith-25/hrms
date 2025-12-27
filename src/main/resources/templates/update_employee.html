@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>Update Employee</title>
+</head>
+<body>
+
+<div layout:fragment="content">
+    <div class="container" style="max-width: 900px;">
+        <div class="card">
+            <div class="card-header bg-white py-3">
+                <h4 class="mb-0 fw-bold">Update Employee Profile</h4>
+            </div>
+            <div class="card-body p-4">
+                <form th:action="@{/admin/employee/update}" th:object="${employeeRequest}" method="POST">
+                    <input type="hidden" th:field="*{id}" />
+
+                    <h5 class="text-primary mb-3">Personal Details</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">First Name</label>
+                            <input type="text" th:field="*{firstName}" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Last Name</label>
+                            <input type="text" th:field="*{lastName}" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Email Address</label>
+                            <input type="email" th:field="*{email}" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Position / Job Title</label>
+                            <input type="text" th:field="*{position}" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Hire Date</label>
+                            <input type="date" th:field="*{hireDate}" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Department</label>
+                            <select th:field="*{departmentId}" class="form-select" required>
+                                <option value="">Select Department...</option>
+                                <option th:each="dept : ${allDepartments}" th:value="${dept.id}" th:text="${dept.name}"></option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <h5 class="text-primary mb-3">System Access & Roles</h5>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Username (Read-Only)</label>
+                            <input type="text" th:field="*{username}" class="form-control bg-light" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Password (Encrypted)</label>
+                            <input type="password" value="********" class="form-control bg-light" readonly>
+                            <input type="hidden" th:field="*{password}">
+                        </div>
+                    </div>
+
+                    <div class="card bg-light border-0">
+                        <div class="card-body">
+                            <label class="fw-bold mb-2">Assign Roles:</label>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-check form-switch mb-2">
+                                        <input class="form-check-input" type="checkbox" id="roleManager" th:field="*{manager}">
+                                        <label class="form-check-label" for="roleManager">Manager</label>
+                                    </div>
+                                    <div class="form-check form-switch mb-2">
+                                        <input class="form-check-input" type="checkbox" id="roleHrManager" th:field="*{hrManager}">
+                                        <label class="form-check-label" for="roleHrManager">HR Manager</label>
+                                    </div>
+                                    <div class="form-check form-switch mb-2">
+                                        <input class="form-check-input" type="checkbox" id="roleHrStaff" th:field="*{hrStaff}">
+                                        <label class="form-check-label" for="roleHrStaff">HR Staff</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check form-switch mb-2">
+                                        <input class="form-check-input" type="checkbox" id="roleFinance" th:field="*{finance}">
+                                        <label class="form-check-label" for="roleFinance">Finance</label>
+                                    </div>
+                                    <div class="form-check form-switch mb-2">
+                                        <input class="form-check-input" type="checkbox" id="roleDirector" th:field="*{director}">
+                                        <label class="form-check-label" for="roleDirector">Director</label>
+                                    </div>
+                                    <div class="form-check form-switch mb-2">
+                                        <input class="form-check-input" type="checkbox" id="roleAdmin" th:field="*{admin}">
+                                        <label class="form-check-label text-danger fw-bold" for="roleAdmin">System Admin</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <a th:href="@{/}" class="btn btn-outline-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary px-4">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

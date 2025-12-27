@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>My Performance Reviews</title>
+</head>
+<body>
+
+<div layout:fragment="content">
+    <h3 class="fw-bold mb-4">My Performance History</h3>
+
+    <div th:if="${#lists.isEmpty(myReviews)}" class="alert alert-info">
+        <i class="bi bi-info-circle me-2"></i> You have no performance reviews on file yet.
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 mb-4" th:each="review : ${myReviews}">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <span class="text-muted small">Date: <strong th:text="${review.reviewDate}"></strong></span>
+                    <span class="badge bg-primary fs-6" th:text="${review.overallRating != null ? review.overallRating + '/5' : 'N/A'}"></span>
+                </div>
+                <div class="card-body">
+                    <h6 class="fw-bold text-success"><i class="bi bi-graph-up-arrow me-2"></i>Strengths</h6>
+                    <p class="small text-secondary mb-3" th:text="${!#strings.isEmpty(review.strengths) ? review.strengths : 'N/A'}"></p>
+
+                    <h6 class="fw-bold text-warning"><i class="bi bi-cone-striped me-2"></i>Areas for Improvement</h6>
+                    <p class="small text-secondary mb-3" th:text="${!#strings.isEmpty(review.areasForImprovement) ? review.areasForImprovement : 'N/A'}"></p>
+
+                    <h6 class="fw-bold text-dark"><i class="bi bi-chat-quote-fill me-2"></i>Manager Comments</h6>
+                    <p class="small text-muted fst-italic mb-0" th:text="${!#strings.isEmpty(review.managerComments) ? review.managerComments : 'N/A'}"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

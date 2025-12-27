@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{layout}">
+<head>
+    <title>Dashboard</title>
+</head>
+<body>
+
+<div layout:fragment="content">
+
+    <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i> <span th:text="${success}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body p-4">
+                    <h2 class="fw-bold">HR Management Dashboard</h2>
+                    <p class="mb-0">Manage employees, payroll, leave, and performance reviews efficiently.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center bg-white">
+            <h5 class="mb-0 fw-bold text-dark">Employee Directory</h5>
+
+            <a sec:authorize="hasAnyRole('ADMIN', 'HR_MANAGER', 'DIRECTOR', 'HR_STAFF')"
+               th:href="@{/showNewEmployeeForm}" class="btn btn-primary btn-sm">
+                <i class="bi bi-person-plus-fill"></i> Add New Employee
+            </a>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-pro table-hover mb-0">
+                    <thead>
+                    <tr>
+                        <th>Employee</th>
+                        <th>Position</th>
+                        <th>Department</th>
+                        <th>Contact</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="employee : ${listEmployees}">
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="bg-light rounded-circle d-flex justify-content-center align-items-center me-3" style="width: 40px; height: 40px; color: #4f46e5; font-weight:bold;">
+                                    <span th:text="${#strings.substring(employee.firstName,0,1)}"></span>
+                                </div>
+                                <div>
+                                    <div class="fw-bold text-dark" th:text="${employee.firstName + ' ' + employee.lastName}"></div>
+                                    <div class="text-muted small" th:text="'ID: #' + ${employee.id}"></div>
+                                </div>
+                            </div>
+                        </td>
+                        <td><span class="badge bg-light text-dark border" th:text="${employee.position}"></span></td>
+                        <td th:text="${employee.department != null ? employee.department.name : '-'}"></td>
+                        <td th:text="${employee.email}"></td>
+
+                        <td>
+                            <div sec:authorize="hasAnyRole('ADMIN', 'HR_MANAGER', 'FINANCE', 'DIRECTOR', 'HR_STAFF')">
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                        Manage
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li sec:authorize="hasAnyRole('ADMIN', 'HR_MANAGER', 'DIRECTOR', 'HR_STAFF')">
+                                            <a class="dropdown-item" th:href="@{/showFormForUpdate/{id}(id=${employee.id})}"><i class="bi bi-pencil me-2"></i> Edit Profile</a>
+                                        </li>
+
+                                        <li><hr class="dropdown-divider"></li>
+
+                                        <li sec:authorize="hasAnyRole('ADMIN', 'HR_MANAGER', 'FINANCE', 'DIRECTOR')">
+                                            <a class="dropdown-item" th:href="@{/admin/payroll/manage/{id}(id=${employee.id})}"><i class="bi bi-gear me-2"></i> Setup Salary</a>
+                                        </li>
+                                        <li sec:authorize="hasAnyRole('ADMIN', 'HR_MANAGER', 'FINANCE', 'DIRECTOR')">
+                                            <a class="dropdown-item" th:href="@{/admin/payroll/run/{id}(id=${employee.id})}"><i class="bi bi-cash me-2"></i> Run Payroll</a>
+                                        </li>
+
+                                        <li sec:authorize="hasAnyRole('ADMIN', 'HR_MANAGER', 'DIRECTOR', 'HR_STAFF')">
+                                            <a class="dropdown-item" th:href="@{/admin/performance/list/{id}(id=${employee.id})}"><i class="bi bi-graph-up me-2"></i> Reviews</a>
+                                        </li>
+
+                                        <li sec:authorize="hasAnyRole('ADMIN', 'DIRECTOR')">
+                                            <a class="dropdown-item" th:href="@{/admin/report/employee/{id}(id=${employee.id})}"><i class="bi bi-download me-2"></i> Download Report</a>
+                                        </li>
+
+                                        <li sec:authorize="hasAnyRole('ADMIN', 'HR_MANAGER', 'DIRECTOR')">
+                                            <hr class="dropdown-divider">
+                                            <form th:action="@{/deleteEmployee/{id}(id=${employee.id})}" method="POST" class="px-3 py-1">
+                                                <button type="submit" class="btn btn-danger btn-sm w-100" onclick="return confirm('Delete this employee?')">Delete</button>
+                                            </form>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <span sec:authorize="!hasAnyRole('ADMIN', 'HR_MANAGER', 'FINANCE', 'DIRECTOR', 'HR_STAFF')" class="text-muted small">
+                                <i class="bi bi-lock"></i> Restricted
+                            </span>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

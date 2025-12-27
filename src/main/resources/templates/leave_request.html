@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>My Leave Requests</title>
+</head>
+<body>
+
+<div layout:fragment="content">
+
+    <h3 class="fw-bold mb-4">Leave Management</h3>
+
+    <div class="row">
+        <div class="col-md-5">
+            <div class="card mb-4">
+                <div class="card-header bg-white fw-bold">
+                    <i class="bi bi-plus-circle me-2"></i> Submit New Request
+                </div>
+                <div class="card-body p-4">
+                    <form th:action="@{/leave/request}" th:object="${leaveRequest}" method="POST">
+                        <div class="mb-3">
+                            <label class="form-label">Start Date</label>
+                            <input type="date" th:field="*{startDate}" class="form-control" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">End Date</label>
+                            <input type="date" th:field="*{endDate}" class="form-control" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Reason</label>
+                            <textarea th:field="*{reason}" class="form-control" rows="4" placeholder="Brief reason for leave..." required></textarea>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">Submit Request</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-7">
+            <div class="card">
+                <div class="card-header bg-white fw-bold">
+                    <i class="bi bi-clock-history me-2"></i> My Request History
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0 align-middle">
+                            <thead class="table-light">
+                            <tr>
+                                <th>Period</th>
+                                <th>Reason</th>
+                                <th>Status</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:if="${#lists.isEmpty(myLeaveRequests)}">
+                                <td colspan="3" class="text-center py-4 text-muted">You have no leave requests.</td>
+                            </tr>
+                            <tr th:each="request : ${myLeaveRequests}">
+                                <td>
+                                    <div th:text="${request.startDate}"></div>
+                                    <small class="text-muted" th:text="${request.endDate}"></small>
+                                </td>
+                                <td th:text="${request.reason}"></td>
+                                <td>
+                                    <span th:if="${request.status.name() == 'APPROVED'}" class="badge bg-success">Approved</span>
+                                    <span th:if="${request.status.name() == 'REJECTED'}" class="badge bg-danger">Rejected</span>
+                                    <span th:if="${request.status.name() == 'PENDING'}" class="badge bg-warning text-dark">Pending</span>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>Run Payroll</title>
+</head>
+<body>
+
+<div layout:fragment="content">
+    <div class="container" style="max-width: 600px;">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white py-3">
+                <h5 class="mb-0 fw-bold"><i class="bi bi-cash-stack me-2"></i> Generate Payslip</h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center mb-4 p-3 bg-light rounded">
+                    <div class="bg-success text-white rounded-circle d-flex justify-content-center align-items-center me-3" style="width: 45px; height: 45px;">
+                        <i class="bi bi-person-fill fs-5"></i>
+                    </div>
+                    <div>
+                        <h6 class="mb-0 fw-bold" th:text="${employee.firstName + ' ' + employee.lastName}"></h6>
+                        <small class="text-muted" th:text="${employee.position}"></small>
+                    </div>
+                </div>
+
+                <div th:if="${param.success}" class="alert alert-success d-flex align-items-center">
+                    <i class="bi bi-check-circle-fill me-2"></i> Payslip generated successfully!
+                </div>
+
+                <form th:action="@{/admin/payroll/run}" method="post">
+                    <input type="hidden" name="employeeId" th:value="${employee.id}">
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Pay Date</label>
+                        <input type="date" name="payDate" th:value="${today}" class="form-control" required>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Bonus Amount (Optional)</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="number" name="bonus" step="0.01" class="form-control" placeholder="0.00" value="0.00">
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-file-earmark-spreadsheet me-2"></i> Generate Payslip
+                        </button>
+                        <a th:href="@{/}" class="btn btn-outline-secondary">Back to Dashboard</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

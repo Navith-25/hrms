@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>My Trainings</title>
+</head>
+<body>
+
+<div layout:fragment="content">
+    <h3 class="fw-bold mb-4">My Training Programs</h3>
+
+    <div th:if="${#lists.isEmpty(trainings)}" class="alert alert-info">
+        <i class="bi bi-info-circle me-2"></i> No training programs assigned to you at this time.
+    </div>
+
+    <div class="row" th:unless="${#lists.isEmpty(trainings)}">
+        <div class="col-md-6 mb-4" th:each="t : ${trainings}">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <h5 class="card-title fw-bold text-primary mb-0" th:text="${t.title}"></h5>
+                        <span class="badge bg-light text-dark border">
+                            <i class="bi bi-calendar-event me-1"></i>
+                            <span th:text="${t.startDate}"></span>
+                        </span>
+                    </div>
+
+                    <p class="card-text text-secondary" th:text="${t.description}"></p>
+
+                    <hr class="my-3">
+
+                    <div class="d-flex justify-content-between align-items-center text-muted small">
+                        <span><i class="bi bi-hourglass-split me-1"></i> Ends: <strong th:text="${t.endDate}"></strong></span>
+                        <span class="badge bg-success bg-opacity-10 text-success">Active</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

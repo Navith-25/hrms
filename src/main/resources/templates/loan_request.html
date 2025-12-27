@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>Request Loan</title>
+</head>
+<body>
+
+<div layout:fragment="content">
+
+    <h3 class="fw-bold mb-4">Financial Services</h3>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-white fw-bold">
+                    <i class="bi bi-cash-coin me-2"></i> Request a Company Loan
+                </div>
+                <div class="card-body p-4">
+                    <form th:action="@{/loan/save}" th:object="${loan}" method="POST">
+                        <div class="mb-3">
+                            <label class="form-label">Amount Needed</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" step="0.01" th:field="*{totalAmount}" class="form-control" placeholder="0.00" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Repayment Period (Months)</label>
+                            <input type="number" th:field="*{repaymentMonths}" class="form-control" placeholder="e.g. 12" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Reason</label>
+                            <textarea th:field="*{reason}" class="form-control" rows="3" required></textarea>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">Submit Application</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header bg-white fw-bold">
+                    <i class="bi bi-list-columns me-2"></i> My Loan History
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                        <tr>
+                            <th>Total</th>
+                            <th>Monthly</th>
+                            <th>Balance</th>
+                            <th>Status</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="l : ${myLoans}">
+                            <td th:text="${l.totalAmount}"></td>
+                            <td th:text="${l.monthlyInstallment}"></td>
+                            <td class="fw-bold text-primary" th:text="${l.remainingBalance}"></td>
+                            <td>
+                                <span th:if="${l.status.name() == 'APPROVED'}" class="badge bg-success">Active</span>
+                                <span th:if="${l.status.name() == 'PENDING'}" class="badge bg-warning text-dark">Pending</span>
+                                <span th:if="${l.status.name() == 'REJECTED'}" class="badge bg-danger">Rejected</span>
+                                <span th:if="${l.status.name() == 'PAID'}" class="badge bg-secondary">Paid Off</span>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

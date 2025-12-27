@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>Manage Payroll</title>
+</head>
+<body>
+
+<div layout:fragment="content">
+    <div class="container" style="max-width: 600px;">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white py-3">
+                <h5 class="mb-0 fw-bold">Payroll Settings</h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center mb-4">
+                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px; font-size: 1.2rem;">
+                        <i class="bi bi-person-fill"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-0 fw-bold" th:text="${employee.firstName + ' ' + employee.lastName}"></h5>
+                        <small class="text-muted" th:text="${employee.position}"></small>
+                    </div>
+                </div>
+
+                <form th:action="@{/admin/payroll/save}" th:object="${payroll}" method="POST">
+                    <input type="hidden" name="employeeId" th:value="${employee.id}" />
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Base Salary (Monthly)</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="number" step="0.01" th:field="*{baseSalary}" class="form-control" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Standard Deductions</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="number" step="0.01" th:field="*{standardDeductions}" class="form-control" required>
+                        </div>
+                        <div class="form-text">Includes tax, insurance, etc.</div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">Save Payroll Settings</button>
+                        <a th:href="@{/}" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
