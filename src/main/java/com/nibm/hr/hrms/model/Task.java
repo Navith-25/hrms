@@ -15,8 +15,9 @@ public class Task {
     @JoinColumn(name = "employee_id", nullable = false)
     private Employee employee;
 
+    // --- FIX: Changed 'manager_id' to 'assigned_by_id' to match your database schema ---
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "manager_id", nullable = false)
+    @JoinColumn(name = "assigned_by_id", nullable = false)
     private Employee manager;
 
     @Column(nullable = false)
