@@ -2,12 +2,15 @@ package com.nibm.hr.hrms.controller;
 
 import com.nibm.hr.hrms.model.*;
 import com.nibm.hr.hrms.service.*;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -158,7 +161,7 @@ public class AttendanceController {
             }
         }
 
-        // F. Loans (Teal) - NEW
+        // F. Loans (Teal)
         if (loanService != null) {
             List<Loan> loans = loanService.getLoansForEmployee(employee);
             for (Loan loan : loans) {
@@ -182,7 +185,7 @@ public class AttendanceController {
             }
         }
 
-        // G. Performance Reviews (Orange) - NEW
+        // G. Performance Reviews (Orange)
         if (performanceReviewService != null) {
             List<PerformanceReview> reviews = performanceReviewService.getReviewsForEmployee(employee);
             for (PerformanceReview review : reviews) {
@@ -239,21 +242,36 @@ public class AttendanceController {
         public void setAllDay(boolean allDay) { this.allDay = allDay; }
     }
 
-    // --- 3. Admin Endpoints (unchanged) ---
+    // --- 3. Admin Endpoints ---
+
     @GetMapping("/admin/attendance")
     public String showMarkAttendanceForm(Model model) {
         List<Employee> employees = employeeService.getAllEmployees();
         model.addAttribute("employees", employees);
-        model.addAttribute("attendance", new Attendance());
+        // Added 'today' attribute so the form has a default date value
+        model.addAttribute("today", LocalDate.now());
         return "mark_attendance";
     }
 
+    // --- UPDATED METHOD: Handles bulk attendance submission ---
     @PostMapping("/admin/attendance/save")
-    public String saveAttendance(@ModelAttribute("attendance") Attendance attendance,
-                                 @RequestParam("employeeId") Long employeeId) {
-        Employee employee = employeeService.getEmployeeById(employeeId);
-        attendance.setEmployee(employee);
-        attendanceService.saveAttendance(attendance);
+    public String saveAttendance(@RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+                                 HttpServletRequest request) {
+
+        List<Employee> employees = employeeService.getAllEmployees();
+
+        for (Employee emp : employees) {
+            // Retrieve the radio button value for this specific employee
+            // The name attribute in HTML is 'status_{id}'
+            String statusParam = "status_" + emp.getId();
+            String statusValue = request.getParameter(statusParam);
+
+            if (statusValue != null && !statusValue.isEmpty()) {
+                // Save using the service's helper method
+                attendanceService.saveAttendance(emp.getId(), date, statusValue);
+            }
+        }
+
         return "redirect:/admin/attendance?success";
     }
 }
