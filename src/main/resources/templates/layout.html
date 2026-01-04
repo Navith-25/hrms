@@ -57,11 +57,13 @@
                 <i class="bi bi-list-check"></i> <span>My Tasks</span>
             </a>
         </li>
-        <li sec:authorize="!hasAnyRole('MANAGER', 'HR_MANAGER', 'ADMIN', 'DIRECTOR', 'FINANCE')">
+
+        <li sec:authorize="!hasRole('ADMIN')">
             <a th:href="@{/loan/request}" class="sidebar-link">
                 <i class="bi bi-bank"></i> <span>Request Loan</span>
             </a>
         </li>
+
         <li sec:authorize="!hasAnyRole('MANAGER', 'HR_MANAGER', 'ADMIN', 'DIRECTOR')">
             <a th:href="@{/employee/trainings}" class="sidebar-link">
                 <i class="bi bi-mortarboard-fill"></i> <span>My Trainings</span>
