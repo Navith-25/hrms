@@ -58,7 +58,8 @@ public class TaskServiceImpl implements TaskService {
             return employeeRepository.findByUser_Roles_NameIn(List.of("ROLE_MANAGER", "ROLE_HR_MANAGER"));
         }
 
-        if (roles.contains("ROLE_MANAGER") || roles.contains("ROLE_HR_MANAGER")) {
+        // UPDATED: Added ROLE_FINANCE to allow Finance Managers to see their team
+        if (roles.contains("ROLE_MANAGER") || roles.contains("ROLE_HR_MANAGER") || roles.contains("ROLE_FINANCE")) {
             Employee manager = currentUser.getEmployee();
             Department department = departmentRepository.findByManager(manager).orElse(null);
             if (department == null) return List.of();
@@ -97,7 +98,8 @@ public class TaskServiceImpl implements TaskService {
                 throw new AccessDeniedException("Admins/Directors can only assign tasks to Managers.");
             }
         }
-        else if (assignerRoles.contains("ROLE_MANAGER") || assignerRoles.contains("ROLE_HR_MANAGER")) {
+        // UPDATED: Added ROLE_FINANCE to allow them to assign tasks
+        else if (assignerRoles.contains("ROLE_MANAGER") || assignerRoles.contains("ROLE_HR_MANAGER") || assignerRoles.contains("ROLE_FINANCE")) {
             if (assignee.getDepartment() != null && assignee.getDepartment().getManager().equals(assigner)) {
                 isAllowed = true;
             } else {

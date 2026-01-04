@@ -47,7 +47,7 @@ public class SecurityConfig {
                         .requestMatchers("/admin/system/**").hasRole("ADMIN")
 
                         // 6. Loan Management
-                        .requestMatchers("/loan/request", "/loan/save").authenticated() // Allow all authenticated to request, UI handles visibility
+                        .requestMatchers("/loan/request", "/loan/save").authenticated()
                         .requestMatchers("/finance/loans/**", "/finance/loan/**").hasAnyRole("FINANCE", "HR_MANAGER", "DIRECTOR", "MANAGER")
 
                         // 7. Attendance & Calendar Pages
@@ -56,7 +56,8 @@ public class SecurityConfig {
 
                         // 8. Training Module
                         .requestMatchers("/admin/training/**").hasRole("DIRECTOR")
-                        .requestMatchers("/manager/training/**").hasAnyRole("MANAGER", "HR_MANAGER")
+                        // UPDATED: Added FINANCE so Finance Manager can access training assignment
+                        .requestMatchers("/manager/training/**").hasAnyRole("MANAGER", "HR_MANAGER", "FINANCE")
 
                         // STRICT EMPLOYEE ONLY: My Trainings
                         .requestMatchers("/employee/trainings").hasRole("EMPLOYEE")
@@ -86,13 +87,14 @@ public class SecurityConfig {
 
                         // 12. Manager & Employee Specifics
 
-                        // UPDATED: Assign Tasks (Removed ADMIN/DIRECTOR to match layout)
-                        .requestMatchers("/manager/tasks/**").hasAnyRole("MANAGER", "HR_MANAGER")
+                        // UPDATED: Added FINANCE so Finance Manager can assign tasks
+                        .requestMatchers("/manager/tasks/**").hasAnyRole("MANAGER", "HR_MANAGER", "FINANCE")
 
-                        .requestMatchers("/manager/team", "/manager/leave", "/manager/performance/**").hasAnyRole("MANAGER", "HR_MANAGER")
-                        .requestMatchers(HttpMethod.POST, "/manager/leave/approve/**", "/manager/leave/reject/**").hasAnyRole("MANAGER", "HR_MANAGER")
+                        // UPDATED: Added FINANCE to general manager capabilities (Team view, Leave approval, Performance)
+                        .requestMatchers("/manager/team", "/manager/leave", "/manager/performance/**").hasAnyRole("MANAGER", "HR_MANAGER", "FINANCE")
+                        .requestMatchers(HttpMethod.POST, "/manager/leave/approve/**", "/manager/leave/reject/**").hasAnyRole("MANAGER", "HR_MANAGER", "FINANCE")
 
-                        // UPDATED: Personal Essentials (Allow everyone to see their own leave/payslips)
+                        // Personal Essentials
                         .requestMatchers("/leave", "/leave/request", "/payslips", "/performance").authenticated()
 
                         // STRICT EMPLOYEE ONLY: My Tasks
