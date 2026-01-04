@@ -15,7 +15,6 @@ public class PerformanceReview {
     @JoinColumn(name = "employee_id", nullable = false)
     private Employee employee;
 
-    // --- ADDED THIS FIELD ---
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reviewer_id")
     private Employee reviewer;
@@ -23,15 +22,27 @@ public class PerformanceReview {
     @Column(name = "review_date")
     private LocalDate reviewDate;
 
+    // --- Ratings ---
+
     @Column(name = "quality_of_work")
     private Integer qualityOfWork;
 
     private Integer communication;
+
     private Integer productivity;
-    private Integer reliability;
+
+    private Integer reliability; // Matched to 'Dependability' in the form
 
     @Column(name = "overall_rating")
     private Double overallRating;
+
+    // --- Feedback Text Fields ---
+
+    @Column(name = "strengths", length = 1000)
+    private String strengths;
+
+    @Column(name = "areas_for_improvement", length = 1000)
+    private String areasForImprovement;
 
     @Column(name = "manager_comments", length = 1000)
     private String managerComments;
@@ -47,7 +58,6 @@ public class PerformanceReview {
     public Employee getEmployee() { return employee; }
     public void setEmployee(Employee employee) { this.employee = employee; }
 
-    // --- NEW GETTER/SETTER FOR REVIEWER ---
     public Employee getReviewer() { return reviewer; }
     public void setReviewer(Employee reviewer) { this.reviewer = reviewer; }
 
@@ -68,6 +78,12 @@ public class PerformanceReview {
 
     public Double getOverallRating() { return overallRating; }
     public void setOverallRating(Double overallRating) { this.overallRating = overallRating; }
+
+    public String getStrengths() { return strengths; }
+    public void setStrengths(String strengths) { this.strengths = strengths; }
+
+    public String getAreasForImprovement() { return areasForImprovement; }
+    public void setAreasForImprovement(String areasForImprovement) { this.areasForImprovement = areasForImprovement; }
 
     public String getManagerComments() { return managerComments; }
     public void setManagerComments(String managerComments) { this.managerComments = managerComments; }
