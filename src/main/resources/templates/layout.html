@@ -34,39 +34,39 @@
             </a>
         </li>
 
-        <div sec:authorize="hasRole('EMPLOYEE')">
-            <li class="menu-header">Self Service</li>
-            <li>
-                <a th:href="@{/leave}" class="sidebar-link">
-                    <i class="bi bi-briefcase-fill"></i> <span>My Leave</span>
-                </a>
-            </li>
-            <li>
-                <a th:href="@{/payslips}" class="sidebar-link">
-                    <i class="bi bi-cash-stack"></i> <span>My Payslips</span>
-                </a>
-            </li>
-            <li>
-                <a th:href="@{/performance}" class="sidebar-link">
-                    <i class="bi bi-graph-up-arrow"></i> <span>Performance</span>
-                </a>
-            </li>
-            <li>
-                <a th:href="@{/employee/tasks}" class="sidebar-link">
-                    <i class="bi bi-list-check"></i> <span>My Tasks</span>
-                </a>
-            </li>
-            <li>
-                <a th:href="@{/loan/request}" class="sidebar-link">
-                    <i class="bi bi-bank"></i> <span>Request Loan</span>
-                </a>
-            </li>
-            <li>
-                <a th:href="@{/employee/trainings}" class="sidebar-link">
-                    <i class="bi bi-mortarboard-fill"></i> <span>My Trainings</span>
-                </a>
-            </li>
-        </div>
+        <li class="menu-header">Self Service</li>
+
+        <li>
+            <a th:href="@{/leave}" class="sidebar-link">
+                <i class="bi bi-briefcase-fill"></i> <span>My Leave</span>
+            </a>
+        </li>
+        <li>
+            <a th:href="@{/payslips}" class="sidebar-link">
+                <i class="bi bi-cash-stack"></i> <span>My Payslips</span>
+            </a>
+        </li>
+        <li>
+            <a th:href="@{/performance}" class="sidebar-link">
+                <i class="bi bi-graph-up-arrow"></i> <span>My Performance</span>
+            </a>
+        </li>
+
+        <li sec:authorize="!hasAnyRole('MANAGER', 'HR_MANAGER', 'ADMIN', 'DIRECTOR')">
+            <a th:href="@{/employee/tasks}" class="sidebar-link">
+                <i class="bi bi-list-check"></i> <span>My Tasks</span>
+            </a>
+        </li>
+        <li sec:authorize="!hasAnyRole('MANAGER', 'HR_MANAGER', 'ADMIN', 'DIRECTOR', 'FINANCE')">
+            <a th:href="@{/loan/request}" class="sidebar-link">
+                <i class="bi bi-bank"></i> <span>Request Loan</span>
+            </a>
+        </li>
+        <li sec:authorize="!hasAnyRole('MANAGER', 'HR_MANAGER', 'ADMIN', 'DIRECTOR')">
+            <a th:href="@{/employee/trainings}" class="sidebar-link">
+                <i class="bi bi-mortarboard-fill"></i> <span>My Trainings</span>
+            </a>
+        </li>
 
         <div sec:authorize="hasAnyRole('MANAGER', 'HR_MANAGER')">
             <li class="menu-header">Management</li>

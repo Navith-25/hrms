@@ -34,7 +34,7 @@ public class SecurityConfig {
                         // 1. Static Resources & Login (Always Allow)
                         .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**", "/login", "/register").permitAll()
 
-                        // 2. API Endpoints (CRITICAL FOR CALENDAR)
+                        // 2. API Endpoints
                         .requestMatchers("/api/**").authenticated()
 
                         // 3. Dashboard Access (Everyone logged in)
@@ -47,7 +47,7 @@ public class SecurityConfig {
                         .requestMatchers("/admin/system/**").hasRole("ADMIN")
 
                         // 6. Loan Management
-                        .requestMatchers("/loan/request", "/loan/save").hasRole("EMPLOYEE")
+                        .requestMatchers("/loan/request", "/loan/save").authenticated() // Allow all authenticated to request, UI handles visibility
                         .requestMatchers("/finance/loans/**", "/finance/loan/**").hasAnyRole("FINANCE", "HR_MANAGER", "DIRECTOR", "MANAGER")
 
                         // 7. Attendance & Calendar Pages
@@ -57,6 +57,8 @@ public class SecurityConfig {
                         // 8. Training Module
                         .requestMatchers("/admin/training/**").hasRole("DIRECTOR")
                         .requestMatchers("/manager/training/**").hasAnyRole("MANAGER", "HR_MANAGER")
+
+                        // STRICT EMPLOYEE ONLY: My Trainings
                         .requestMatchers("/employee/trainings").hasRole("EMPLOYEE")
 
                         // 9. Specific GET Rules (Viewing Forms)
@@ -83,12 +85,20 @@ public class SecurityConfig {
                         .requestMatchers("/admin/reports/**", "/admin/report/**").hasAnyRole("ADMIN", "DIRECTOR")
 
                         // 12. Manager & Employee Specifics
-                        .requestMatchers("/manager/tasks/**").hasAnyRole("MANAGER", "HR_MANAGER", "ADMIN", "DIRECTOR")
+
+                        // UPDATED: Assign Tasks (Removed ADMIN/DIRECTOR to match layout)
+                        .requestMatchers("/manager/tasks/**").hasAnyRole("MANAGER", "HR_MANAGER")
+
                         .requestMatchers("/manager/team", "/manager/leave", "/manager/performance/**").hasAnyRole("MANAGER", "HR_MANAGER")
                         .requestMatchers(HttpMethod.POST, "/manager/leave/approve/**", "/manager/leave/reject/**").hasAnyRole("MANAGER", "HR_MANAGER")
 
-                        .requestMatchers("/leave", "/leave/request", "/payslips", "/performance", "/employee/tasks/**").hasRole("EMPLOYEE")
-                        .requestMatchers(HttpMethod.GET, "/payslip/{id}").hasAnyRole("EMPLOYEE", "ADMIN", "HR_MANAGER", "DIRECTOR", "FINANCE")
+                        // UPDATED: Personal Essentials (Allow everyone to see their own leave/payslips)
+                        .requestMatchers("/leave", "/leave/request", "/payslips", "/performance").authenticated()
+
+                        // STRICT EMPLOYEE ONLY: My Tasks
+                        .requestMatchers("/employee/tasks/**").hasRole("EMPLOYEE")
+
+                        .requestMatchers(HttpMethod.GET, "/payslip/{id}").hasAnyRole("EMPLOYEE", "ADMIN", "HR_MANAGER", "DIRECTOR", "FINANCE", "MANAGER", "HR_STAFF")
 
                         // 13. General Catch-All
                         .requestMatchers("/admin/**").hasAnyRole("ADMIN", "DIRECTOR")
