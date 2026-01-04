@@ -31,51 +31,48 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(authorize -> authorize
-                        // 1. Static Resources & Login (Always Allow)
+                        // 1. Static Resources & Login
                         .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**", "/login", "/register").permitAll()
 
                         // 2. API Endpoints
                         .requestMatchers("/api/**").authenticated()
 
-                        // 3. Dashboard Access (Everyone logged in)
+                        // 3. Dashboard Access
                         .requestMatchers("/").hasAnyRole("ADMIN", "HR_MANAGER", "HR_STAFF", "FINANCE", "DIRECTOR", "MANAGER", "EMPLOYEE")
 
                         // 4. Messaging
                         .requestMatchers("/messages/**").authenticated()
 
-                        // 5. System Reset (Admin Only)
+                        // 5. System Reset
                         .requestMatchers("/admin/system/**").hasRole("ADMIN")
 
                         // 6. Loan Management
                         .requestMatchers("/loan/request", "/loan/save").authenticated()
                         .requestMatchers("/finance/loans/**", "/finance/loan/**").hasAnyRole("FINANCE", "HR_MANAGER", "DIRECTOR", "MANAGER")
 
-                        // 7. Attendance & Calendar Pages
+                        // 7. Attendance & Calendar
                         .requestMatchers("/admin/attendance/**").hasRole("HR_STAFF")
                         .requestMatchers("/my-calendar").authenticated()
 
                         // 8. Training Module
                         .requestMatchers("/admin/training/**").hasRole("DIRECTOR")
-                        // UPDATED: Added FINANCE so Finance Manager can access training assignment
+                        // FIXED: Added FINANCE role here
                         .requestMatchers("/manager/training/**").hasAnyRole("MANAGER", "HR_MANAGER", "FINANCE")
 
-                        // STRICT EMPLOYEE ONLY: My Trainings
+                        // My Trainings (Employee Only)
                         .requestMatchers("/employee/trainings").hasRole("EMPLOYEE")
 
-                        // 9. Specific GET Rules (Viewing Forms)
+                        // 9. Specific GET Rules
                         .requestMatchers(HttpMethod.GET, "/showNewEmployeeForm", "/showFormForUpdate/**")
                         .hasAnyRole("HR_STAFF", "ADMIN", "HR_MANAGER", "DIRECTOR")
-
                         .requestMatchers(HttpMethod.GET, "/admin/leave")
                         .hasAnyRole("HR_STAFF", "ADMIN", "HR_MANAGER", "DIRECTOR")
-
                         .requestMatchers(HttpMethod.GET, "/admin/performance/list/**")
                         .hasAnyRole("HR_STAFF", "ADMIN", "HR_MANAGER", "DIRECTOR")
 
-                        // 10. Admin Actions (Saving/Deleting)
+                        // 10. Admin Actions
                         .requestMatchers(HttpMethod.POST, "/admin/employee/saveNew", "/admin/employee/update")
                         .hasAnyRole("ADMIN", "HR_MANAGER", "HR_STAFF", "DIRECTOR")
-
                         .requestMatchers(HttpMethod.POST, "/deleteEmployee/**")
                         .hasAnyRole("ADMIN", "HR_MANAGER", "DIRECTOR")
 
@@ -86,18 +83,15 @@ public class SecurityConfig {
                         .requestMatchers("/admin/reports/**", "/admin/report/**").hasAnyRole("ADMIN", "DIRECTOR")
 
                         // 12. Manager & Employee Specifics
-
-                        // UPDATED: Added FINANCE so Finance Manager can assign tasks
+                        // FIXED: Added FINANCE role to tasks and general manager areas
                         .requestMatchers("/manager/tasks/**").hasAnyRole("MANAGER", "HR_MANAGER", "FINANCE")
-
-                        // UPDATED: Added FINANCE to general manager capabilities (Team view, Leave approval, Performance)
                         .requestMatchers("/manager/team", "/manager/leave", "/manager/performance/**").hasAnyRole("MANAGER", "HR_MANAGER", "FINANCE")
                         .requestMatchers(HttpMethod.POST, "/manager/leave/approve/**", "/manager/leave/reject/**").hasAnyRole("MANAGER", "HR_MANAGER", "FINANCE")
 
                         // Personal Essentials
                         .requestMatchers("/leave", "/leave/request", "/payslips", "/performance").authenticated()
 
-                        // STRICT EMPLOYEE ONLY: My Tasks
+                        // My Tasks (Employee Only)
                         .requestMatchers("/employee/tasks/**").hasRole("EMPLOYEE")
 
                         .requestMatchers(HttpMethod.GET, "/payslip/{id}").hasAnyRole("EMPLOYEE", "ADMIN", "HR_MANAGER", "DIRECTOR", "FINANCE", "MANAGER", "HR_STAFF")

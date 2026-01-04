@@ -47,8 +47,13 @@ public class TrainingController {
         User user = userRepository.findByUsername(principal.getName());
         Employee manager = user.getEmployee();
 
-        Department department = departmentRepository.findByManager(manager)
-                .orElseThrow(() -> new AccessDeniedException("You are not managing any department"));
+        // FIXED: Use manager.getDepartment() instead of finding by manager ID
+        // This ensures Finance managers see trainings for the Finance dept
+        Department department = manager.getDepartment();
+
+        if (department == null) {
+            throw new AccessDeniedException("You do not belong to any department.");
+        }
 
         List<TrainingProgram> trainings = trainingService.getTrainingsForDepartment(department);
         model.addAttribute("trainings", trainings);
@@ -60,16 +65,20 @@ public class TrainingController {
     public String showAssignForm(@PathVariable("id") Long trainingId, Model model, Principal principal) {
         User user = userRepository.findByUsername(principal.getName());
         Employee manager = user.getEmployee();
-        Department department = departmentRepository.findByManager(manager).orElse(null);
+
+        // FIXED: Use manager.getDepartment()
+        Department department = manager.getDepartment();
 
         TrainingProgram training = trainingService.getTrainingById(trainingId);
 
         List<Employee> deptEmployees = employeeRepository.findByDepartment(department);
 
+        // Filter out the manager themselves
         deptEmployees = deptEmployees.stream()
                 .filter(e -> !e.getId().equals(manager.getId()))
                 .collect(Collectors.toList());
 
+        // Filter out Admins
         deptEmployees = deptEmployees.stream()
                 .filter(e -> e.getUser().getRoles().stream()
                         .noneMatch(r -> r.getName().equals("ROLE_ADMIN")))

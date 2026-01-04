@@ -34,7 +34,6 @@ public class TaskServiceImpl implements TaskService {
         return userRepository.findByUsername(principal.getName());
     }
 
-
     @Override
     public List<Task> getTasksAssignedByManager(Principal principal) {
         User user = userRepository.findByUsername(principal.getName());
@@ -54,18 +53,22 @@ public class TaskServiceImpl implements TaskService {
                 .map(Role::getName)
                 .collect(Collectors.toSet());
 
+        // Admins/Directors see other Managers
         if (roles.contains("ROLE_ADMIN") || roles.contains("ROLE_DIRECTOR")) {
-            return employeeRepository.findByUser_Roles_NameIn(List.of("ROLE_MANAGER", "ROLE_HR_MANAGER"));
+            return employeeRepository.findByUser_Roles_NameIn(List.of("ROLE_MANAGER", "ROLE_HR_MANAGER", "ROLE_FINANCE"));
         }
 
-        // UPDATED: Added ROLE_FINANCE to allow Finance Managers to see their team
+        // Managers/Finance/HR see their Department Members
         if (roles.contains("ROLE_MANAGER") || roles.contains("ROLE_HR_MANAGER") || roles.contains("ROLE_FINANCE")) {
             Employee manager = currentUser.getEmployee();
-            Department department = departmentRepository.findByManager(manager).orElse(null);
+
+            // FIXED: Get department directly from the logged-in employee
+            Department department = manager.getDepartment();
+
             if (department == null) return List.of();
 
             return employeeRepository.findByDepartment(department).stream()
-                    .filter(e -> !e.equals(manager))
+                    .filter(e -> !e.equals(manager)) // Exclude self
                     .collect(Collectors.toList());
         }
 
@@ -92,15 +95,15 @@ public class TaskServiceImpl implements TaskService {
         boolean isAllowed = false;
 
         if (assignerRoles.contains("ROLE_ADMIN") || assignerRoles.contains("ROLE_DIRECTOR")) {
-            if (assigneeRoles.contains("ROLE_MANAGER") || assigneeRoles.contains("ROLE_HR_MANAGER")) {
+            if (assigneeRoles.contains("ROLE_MANAGER") || assigneeRoles.contains("ROLE_HR_MANAGER") || assigneeRoles.contains("ROLE_FINANCE")) {
                 isAllowed = true;
             } else {
                 throw new AccessDeniedException("Admins/Directors can only assign tasks to Managers.");
             }
         }
-        // UPDATED: Added ROLE_FINANCE to allow them to assign tasks
         else if (assignerRoles.contains("ROLE_MANAGER") || assignerRoles.contains("ROLE_HR_MANAGER") || assignerRoles.contains("ROLE_FINANCE")) {
-            if (assignee.getDepartment() != null && assignee.getDepartment().getManager().equals(assigner)) {
+            // FIXED: Check if they belong to the SAME department
+            if (assignee.getDepartment() != null && assignee.getDepartment().equals(assigner.getDepartment())) {
                 isAllowed = true;
             } else {
                 throw new AccessDeniedException("You can only assign tasks to your department members.");
