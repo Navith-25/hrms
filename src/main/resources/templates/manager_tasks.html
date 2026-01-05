@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
       layout:decorate="~{layout}">
 <head>
     <title>Manage Tasks</title>
@@ -10,7 +11,9 @@
 <div layout:fragment="content">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h3 class="fw-bold m-0">Team Tasks</h3>
-        <a th:href="@{/manager/tasks/new}" class="btn btn-primary">
+
+        <a th:href="@{/manager/tasks/new}" class="btn btn-primary"
+           sec:authorize="hasAnyRole('MANAGER', 'HR_MANAGER', 'FINANCE')">
             <i class="bi bi-plus-lg me-2"></i> Assign New Task
         </a>
     </div>
@@ -21,50 +24,37 @@
                 <table class="table table-hover align-middle mb-0">
                     <thead class="bg-light">
                     <tr>
-                        <th class="ps-4">Task Title</th>
+                        <th class="ps-4">Title</th>
                         <th>Assigned To</th>
                         <th>Deadline</th>
+                        <th>Priority</th>
                         <th>Status</th>
-                        <th>Rating</th>
                         <th class="text-end pe-4">Actions</th>
                     </tr>
                     </thead>
                     <tbody>
-                    <tr th:if="${#lists.isEmpty(tasks)}">
-                        <td colspan="6" class="text-center py-5 text-muted">
-                            <i class="bi bi-clipboard-check display-4 mb-2 d-block"></i>
-                            No active tasks assigned to your team.
-                        </td>
-                    </tr>
                     <tr th:each="task : ${tasks}">
                         <td class="ps-4 fw-bold" th:text="${task.title}"></td>
+                        <td th:text="${task.employee.firstName + ' ' + task.employee.lastName}"></td>
+                        <td th:text="${task.deadline}"></td>
                         <td>
-                            <div class="d-flex align-items-center">
-                                <div class="bg-light rounded-circle d-flex justify-content-center align-items-center me-2 small fw-bold text-primary" style="width: 32px; height: 32px;">
-                                    <span th:text="${#strings.substring(task.employee.firstName,0,1)}"></span>
-                                </div>
-                                <span th:text="${task.employee.firstName + ' ' + task.employee.lastName}"></span>
-                            </div>
+                            <span class="badge"
+                                  th:classappend="${task.priority == 'High' ? 'bg-danger' : (task.priority == 'Medium' ? 'bg-warning text-dark' : 'bg-success')}"
+                                  th:text="${task.priority}"></span>
                         </td>
-                        <td class="text-muted small" th:text="${task.deadline}"></td>
                         <td>
-                            <span class="badge rounded-pill"
-                                  th:classappend="${task.status.name() == 'COMPLETED' ? 'bg-success' : (task.status.name() == 'SUBMITTED' ? 'bg-warning text-dark' : 'bg-secondary')}"
-                                  th:text="${task.status}">
-                            </span>
+                            <span class="badge"
+                                  th:classappend="${task.status.name() == 'COMPLETED' ? 'bg-success' : (task.status.name() == 'SUBMITTED' ? 'bg-info text-dark' : 'bg-secondary')}"
+                                  th:text="${task.status}"></span>
                         </td>
-                        <td th:text="${task.rating != null ? task.rating + '/10' : '-'}"></td>
                         <td class="text-end pe-4">
                             <a th:if="${task.status.name() == 'SUBMITTED'}"
                                th:href="@{/manager/tasks/review/{id}(id=${task.id})}"
-                               class="btn btn-sm btn-outline-success">
-                                <i class="bi bi-star me-1"></i> Review
-                            </a>
-                            <span th:if="${task.status.name() == 'PENDING'}" class="text-muted small fst-italic">In Progress</span>
-                            <span th:if="${task.status.name() == 'COMPLETED'}" class="text-success small fw-bold">
-                                <i class="bi bi-check-all"></i> Done
-                            </span>
+                               class="btn btn-sm btn-outline-success">Review</a>
                         </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(tasks)}">
+                        <td colspan="6" class="text-center py-4 text-muted">No tasks found.</td>
                     </tr>
                     </tbody>
                 </table>
