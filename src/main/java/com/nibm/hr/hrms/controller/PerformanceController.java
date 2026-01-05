@@ -37,6 +37,15 @@ public class PerformanceController {
         return user.getEmployee();
     }
 
+    private void checkNotAdmin(Principal principal) {
+        User user = userRepository.findByUsername(principal.getName());
+        boolean isAdmin = user.getRoles().stream()
+                .anyMatch(r -> r.getName().equals("ROLE_ADMIN"));
+        if (isAdmin) {
+            throw new AccessDeniedException("The Owner (Admin) does not conduct performance reviews.");
+        }
+    }
+
     @GetMapping("/admin/performance/list/{employeeId}")
     public String showEmployeeReviewList(@PathVariable Long employeeId, Model model) {
         Employee employee = employeeService.getEmployeeById(employeeId);
@@ -48,6 +57,9 @@ public class PerformanceController {
 
     @GetMapping("/admin/performance/new/{employeeId}")
     public String showNewReviewForm(@PathVariable Long employeeId, Model model, Principal principal) {
+        // Block Admin from seeing the form
+        checkNotAdmin(principal);
+
         Employee loggedIn = getEmployeeFromPrincipal(principal);
         if (loggedIn.getId().equals(employeeId)) {
             throw new AccessDeniedException("You cannot create a performance review for yourself.");
@@ -63,7 +75,9 @@ public class PerformanceController {
     }
 
     @GetMapping("/admin/performance/edit/{reviewId}")
-    public String showEditReviewForm(@PathVariable Long reviewId, Model model) {
+    public String showEditReviewForm(@PathVariable Long reviewId, Model model, Principal principal) {
+        checkNotAdmin(principal);
+
         PerformanceReview review = reviewService.getReviewById(reviewId);
         model.addAttribute("review", review);
         model.addAttribute("employeeName", review.getEmployee().getFirstName() + " " + review.getEmployee().getLastName());
@@ -72,6 +86,8 @@ public class PerformanceController {
 
     @PostMapping("/admin/performance/save")
     public String saveReview(@ModelAttribute("review") PerformanceReview review, Principal principal) {
+        checkNotAdmin(principal);
+
         Employee loggedIn = getEmployeeFromPrincipal(principal);
         if (review.getEmployee() != null && loggedIn.getId().equals(review.getEmployee().getId())) {
             throw new AccessDeniedException("You cannot save a performance review for yourself.");
@@ -79,7 +95,10 @@ public class PerformanceController {
 
         Employee employee = employeeService.getEmployeeById(review.getEmployee().getId());
         review.setEmployee(employee);
-        reviewService.saveReview(review);
+
+        // Pass principal to service for strict role hierarchy validation
+        reviewService.saveReview(review, principal);
+
         return "redirect:/admin/performance/list/" + review.getEmployee().getId();
     }
 }
