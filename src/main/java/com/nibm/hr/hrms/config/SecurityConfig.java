@@ -56,18 +56,15 @@ public class SecurityConfig {
 
                         // 8. Training Module
                         .requestMatchers("/admin/training/**").hasRole("DIRECTOR")
-                        // FIXED: Added FINANCE role here
                         .requestMatchers("/manager/training/**").hasAnyRole("MANAGER", "HR_MANAGER", "FINANCE")
 
-                        // My Trainings (Employee Only)
+                        // My Trainings
                         .requestMatchers("/employee/trainings").hasRole("EMPLOYEE")
 
                         // 9. Specific GET Rules
                         .requestMatchers(HttpMethod.GET, "/showNewEmployeeForm", "/showFormForUpdate/**")
                         .hasAnyRole("HR_STAFF", "ADMIN", "HR_MANAGER", "DIRECTOR")
                         .requestMatchers(HttpMethod.GET, "/admin/leave")
-                        .hasAnyRole("HR_STAFF", "ADMIN", "HR_MANAGER", "DIRECTOR")
-                        .requestMatchers(HttpMethod.GET, "/admin/performance/list/**")
                         .hasAnyRole("HR_STAFF", "ADMIN", "HR_MANAGER", "DIRECTOR")
 
                         // 10. Admin Actions
@@ -77,13 +74,19 @@ public class SecurityConfig {
                         .hasAnyRole("ADMIN", "HR_MANAGER", "DIRECTOR")
 
                         // 11. Admin Sub-Modules
-                        .requestMatchers("/admin/performance/**").hasAnyRole("ADMIN", "HR_MANAGER", "HR_STAFF", "DIRECTOR")
+
+                        // FIXED: Performance Review Logic
+                        // Everyone allowed to SEE the reviews list (including Admin and HR Staff)
+                        .requestMatchers("/admin/performance/list/**").hasAnyRole("ADMIN", "HR_MANAGER", "HR_STAFF", "DIRECTOR")
+
+                        // ONLY HR Manager and Director can CREATE/EDIT reviews (Admin and HR Staff are excluded)
+                        .requestMatchers("/admin/performance/**").hasAnyRole("HR_MANAGER", "DIRECTOR")
+
                         .requestMatchers("/admin/payroll/**").hasAnyRole("ADMIN", "HR_MANAGER", "FINANCE", "DIRECTOR")
                         .requestMatchers("/admin/leave/**").hasAnyRole("ADMIN", "HR_MANAGER", "HR_STAFF", "DIRECTOR")
                         .requestMatchers("/admin/reports/**", "/admin/report/**").hasAnyRole("ADMIN", "DIRECTOR")
 
                         // 12. Manager & Employee Specifics
-                        // FIXED: Added FINANCE role to tasks and general manager areas
                         .requestMatchers("/manager/tasks/**").hasAnyRole("MANAGER", "HR_MANAGER", "FINANCE")
                         .requestMatchers("/manager/team", "/manager/leave", "/manager/performance/**").hasAnyRole("MANAGER", "HR_MANAGER", "FINANCE")
                         .requestMatchers(HttpMethod.POST, "/manager/leave/approve/**", "/manager/leave/reject/**").hasAnyRole("MANAGER", "HR_MANAGER", "FINANCE")
@@ -91,7 +94,7 @@ public class SecurityConfig {
                         // Personal Essentials
                         .requestMatchers("/leave", "/leave/request", "/payslips", "/performance").authenticated()
 
-                        // My Tasks (Employee Only)
+                        // My Tasks
                         .requestMatchers("/employee/tasks/**").hasRole("EMPLOYEE")
 
                         .requestMatchers(HttpMethod.GET, "/payslip/{id}").hasAnyRole("EMPLOYEE", "ADMIN", "HR_MANAGER", "DIRECTOR", "FINANCE", "MANAGER", "HR_STAFF")

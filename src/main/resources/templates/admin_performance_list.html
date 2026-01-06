@@ -17,7 +17,7 @@
 
         <a th:href="@{/admin/performance/new/{id}(id=${employee.id})}"
            class="btn btn-primary btn-sm"
-           sec:authorize="!hasRole('ADMIN')">
+           sec:authorize="!hasAnyRole('ADMIN', 'HR_STAFF')">
             <i class="bi bi-plus-lg"></i> Add Review
         </a>
     </div>
@@ -46,7 +46,7 @@
                         <td class="text-end pe-4">
                             <a th:href="@{/admin/performance/edit/{id}(id=${review.id})}"
                                class="btn btn-sm btn-outline-primary"
-                               sec:authorize="!hasRole('ADMIN')">Edit</a>
+                               sec:authorize="!hasAnyRole('ADMIN', 'HR_STAFF')">Edit</a>
                         </td>
                     </tr>
                     <tr th:if="${#lists.isEmpty(reviews)}">
