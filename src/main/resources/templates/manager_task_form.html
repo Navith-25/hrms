@@ -14,35 +14,44 @@
                 <h5 class="mb-0 fw-bold">Assign New Task</h5>
             </div>
             <div class="card-body p-4">
-                <form th:action="@{/manager/tasks/save}" th:object="${task}" method="post">
-
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Assign To Member</label>
-                        <select name="employeeId" class="form-select" required>
-                            <option value="">-- Select Team Member --</option>
-                            <option th:each="emp : ${teamMembers}"
-                                    th:value="${emp.id}"
-                                    th:text="${emp.firstName + ' ' + emp.lastName}">
-                            </option>
-                        </select>
-                    </div>
+                <form th:action="@{/manager/tasks/assign}" th:object="${task}" method="POST">
 
                     <div class="mb-3">
                         <label class="form-label fw-bold">Task Title</label>
-                        <input type="text" th:field="*{title}" class="form-control" placeholder="e.g. Prepare Monthly Report" required>
+                        <input type="text" th:field="*{title}" class="form-control" required placeholder="Enter task title">
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label fw-bold">Description</label>
-                        <textarea th:field="*{description}" class="form-control" rows="4" placeholder="Detailed instructions..."></textarea>
+                        <textarea th:field="*{description}" class="form-control" rows="3" placeholder="Describe the task..."></textarea>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Assign To</label>
+                            <select name="employeeId" class="form-select" required>
+                                <option value="">Select Employee...</option>
+                                <option th:each="emp : ${employees}"
+                                        th:value="${emp.id}"
+                                        th:text="${emp.firstName + ' ' + emp.lastName}"></option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Deadline</label>
+                            <input type="date" th:field="*{deadline}" class="form-control" required>
+                        </div>
                     </div>
 
                     <div class="mb-4">
-                        <label class="form-label fw-bold">Deadline</label>
-                        <input type="date" th:field="*{deadline}" class="form-control" required>
+                        <label class="form-label fw-bold">Priority</label>
+                        <select th:field="*{priority}" class="form-select" required>
+                            <option value="Low">Low</option>
+                            <option value="Medium" selected>Medium</option>
+                            <option value="High">High</option>
+                        </select>
                     </div>
 
-                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <div class="d-flex justify-content-end gap-2">
                         <a th:href="@{/manager/tasks}" class="btn btn-outline-secondary">Cancel</a>
                         <button type="submit" class="btn btn-primary px-4">Assign Task</button>
                     </div>

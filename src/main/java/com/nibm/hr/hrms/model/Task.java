@@ -11,48 +11,42 @@ public class Task {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "employee_id", nullable = false)
-    private Employee employee;
-
-    // --- FIX: Changed 'manager_id' to 'assigned_by_id' to match your database schema ---
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "assigned_by_id", nullable = false)
-    private Employee manager;
-
-    @Column(nullable = false)
     private String title;
-
-    @Column(columnDefinition = "TEXT")
     private String description;
-
-    @Column(nullable = false)
     private LocalDate deadline;
 
-    @Column(nullable = false)
+    // ADDED PRIORITY FIELD
+    private String priority;
+
+    @Column(name = "assigned_date")
     private LocalDate assignedDate;
 
     @Enumerated(EnumType.STRING)
     private TaskStatus status;
 
-    private Integer rating;
-
-    @Column(columnDefinition = "TEXT")
+    @Column(name = "manager_comments")
     private String managerComments;
 
+    private Integer rating;
+
+    @ManyToOne
+    @JoinColumn(name = "assigned_by_id")
+    private Employee manager;
+
+    @ManyToOne
+    @JoinColumn(name = "employee_id")
+    private Employee employee;
+
+    // --- Constructors ---
     public Task() {
         this.assignedDate = LocalDate.now();
         this.status = TaskStatus.PENDING;
     }
 
+    // --- Getters and Setters ---
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
-
-    public Employee getEmployee() { return employee; }
-    public void setEmployee(Employee employee) { this.employee = employee; }
-
-    public Employee getManager() { return manager; }
-    public void setManager(Employee manager) { this.manager = manager; }
 
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
@@ -63,15 +57,25 @@ public class Task {
     public LocalDate getDeadline() { return deadline; }
     public void setDeadline(LocalDate deadline) { this.deadline = deadline; }
 
+    // Added Getter/Setter for Priority
+    public String getPriority() { return priority; }
+    public void setPriority(String priority) { this.priority = priority; }
+
     public LocalDate getAssignedDate() { return assignedDate; }
     public void setAssignedDate(LocalDate assignedDate) { this.assignedDate = assignedDate; }
 
     public TaskStatus getStatus() { return status; }
     public void setStatus(TaskStatus status) { this.status = status; }
 
+    public String getManagerComments() { return managerComments; }
+    public void setManagerComments(String managerComments) { this.managerComments = managerComments; }
+
     public Integer getRating() { return rating; }
     public void setRating(Integer rating) { this.rating = rating; }
 
-    public String getManagerComments() { return managerComments; }
-    public void setManagerComments(String managerComments) { this.managerComments = managerComments; }
+    public Employee getManager() { return manager; }
+    public void setManager(Employee manager) { this.manager = manager; }
+
+    public Employee getEmployee() { return employee; }
+    public void setEmployee(Employee employee) { this.employee = employee; }
 }
