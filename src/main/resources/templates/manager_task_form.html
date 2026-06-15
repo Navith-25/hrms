@@ -14,7 +14,7 @@
                 <h5 class="mb-0 fw-bold">Assign New Task</h5>
             </div>
             <div class="card-body p-4">
-                <form th:action="@{/manager/tasks/assign}" th:object="${task}" method="POST">
+                <form th:action="@{/manager/tasks/save}" th:object="${task}" method="POST">
 
                     <div class="mb-3">
                         <label class="form-label fw-bold">Task Title</label>
@@ -31,7 +31,7 @@
                             <label class="form-label fw-bold">Assign To</label>
                             <select name="employeeId" class="form-select" required>
                                 <option value="">Select Employee...</option>
-                                <option th:each="emp : ${employees}"
+                                <option th:each="emp : ${teamMembers}"
                                         th:value="${emp.id}"
                                         th:text="${emp.firstName + ' ' + emp.lastName}"></option>
                             </select>
