@@ -56,7 +56,7 @@ public class SecurityConfig {
 
                         // 8. Training Module
                         .requestMatchers("/admin/training/**").hasRole("DIRECTOR")
-                        .requestMatchers("/manager/training/**").hasAnyRole("MANAGER", "HR_MANAGER", "FINANCE")
+                        .requestMatchers("/manager/training/**").hasAnyRole("MANAGER", "HR_MANAGER")
 
                         // My Trainings
                         .requestMatchers("/employee/trainings").hasRole("EMPLOYEE")
@@ -87,9 +87,9 @@ public class SecurityConfig {
                         .requestMatchers("/admin/reports/**", "/admin/report/**").hasAnyRole("ADMIN", "DIRECTOR")
 
                         // 12. Manager & Employee Specifics
-                        .requestMatchers("/manager/tasks/**").hasAnyRole("MANAGER", "HR_MANAGER", "FINANCE")
-                        .requestMatchers("/manager/team", "/manager/leave", "/manager/performance/**").hasAnyRole("MANAGER", "HR_MANAGER", "FINANCE")
-                        .requestMatchers(HttpMethod.POST, "/manager/leave/approve/**", "/manager/leave/reject/**").hasAnyRole("MANAGER", "HR_MANAGER", "FINANCE")
+                        .requestMatchers("/manager/tasks/**").hasAnyRole("MANAGER", "HR_MANAGER")
+                        .requestMatchers("/manager/team", "/manager/leave", "/manager/performance/**").hasAnyRole("MANAGER", "HR_MANAGER")
+                        .requestMatchers(HttpMethod.POST, "/manager/leave/approve/**", "/manager/leave/reject/**").hasAnyRole("MANAGER", "HR_MANAGER")
 
                         // Personal Essentials
                         .requestMatchers("/leave", "/leave/request", "/payslips", "/performance").authenticated()

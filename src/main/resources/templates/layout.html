@@ -71,7 +71,7 @@
             </a>
         </li>
 
-        <div sec:authorize="hasAnyRole('MANAGER', 'HR_MANAGER', 'FINANCE')">
+        <div sec:authorize="hasAnyRole('MANAGER', 'HR_MANAGER')">
             <li class="menu-header">Management</li>
             <li>
                 <a th:href="@{/manager/leave}" class="sidebar-link">
