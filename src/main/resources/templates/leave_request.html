@@ -1,76 +1,246 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
       layout:decorate="~{layout}">
 <head>
-    <title>My Leave Requests</title>
+    <title>My Leave Dashboard</title>
+    <style>
+        .balance-card { transition: transform 0.2s; border: none; border-radius: 12px; }
+        .balance-card:hover { transform: translateY(-5px); }
+        .icon-circle { width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; background: rgba(255,255,255,0.2); }
+    </style>
 </head>
 <body>
 
 <div layout:fragment="content">
 
-    <h3 class="fw-bold mb-4">Leave Management</h3>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="fw-bold m-0"><i class="bi bi-calendar-range text-primary me-2"></i> Leave Dashboard</h3>
+        <span class="badge bg-light text-dark border"><i class="bi bi-info-circle me-1"></i> Self Service</span>
+    </div>
+
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        <span th:text="${errorMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>
+        <span th:text="${successMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div class="row mb-4" th:if="${employee != null}" sec:authorize="!hasRole('ADMIN')">
+        <th:block sec:authorize="hasRole('DIRECTOR')">
+            <div class="col-md-3">
+                <div class="card balance-card bg-primary text-white shadow-sm p-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1 text-uppercase text-white-50 small fw-bold">Annual</h6>
+                            <h2 class="fw-bold m-0">&infin;</h2>
+                            <small class="text-white-50">Unlimited</small>
+                        </div>
+                        <div class="icon-circle"><i class="bi bi-airplane"></i></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card balance-card bg-success text-white shadow-sm p-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1 text-uppercase text-white-50 small fw-bold">Casual</h6>
+                            <h2 class="fw-bold m-0">&infin;</h2>
+                            <small class="text-white-50">Unlimited</small>
+                        </div>
+                        <div class="icon-circle"><i class="bi bi-cup-hot"></i></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card balance-card bg-danger text-white shadow-sm p-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1 text-uppercase text-white-50 small fw-bold">Sick</h6>
+                            <h2 class="fw-bold m-0">&infin;</h2>
+                            <small class="text-white-50">Unlimited</small>
+                        </div>
+                        <div class="icon-circle"><i class="bi bi-bandaid"></i></div>
+                    </div>
+                </div>
+            </div>
+        </th:block>
+
+        <th:block sec:authorize="!hasAnyRole('DIRECTOR', 'ADMIN')">
+            <div class="col-md-3">
+                <div class="card balance-card bg-primary text-white shadow-sm p-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1 text-uppercase text-white-50 small fw-bold">Annual</h6>
+                            <h2 class="fw-bold m-0" th:text="${employee.annualLeaveBalance}">0.0</h2>
+                            <small class="text-white-50">Days Available</small>
+                        </div>
+                        <div class="icon-circle"><i class="bi bi-airplane"></i></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card balance-card bg-success text-white shadow-sm p-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1 text-uppercase text-white-50 small fw-bold">Casual</h6>
+                            <h2 class="fw-bold m-0" th:text="${employee.casualLeaveBalance}">0.0</h2>
+                            <small class="text-white-50">Days Available</small>
+                        </div>
+                        <div class="icon-circle"><i class="bi bi-cup-hot"></i></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card balance-card bg-danger text-white shadow-sm p-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1 text-uppercase text-white-50 small fw-bold">Sick</h6>
+                            <h2 class="fw-bold m-0" th:text="${employee.sickLeaveBalance}">0.0</h2>
+                            <small class="text-white-50">Days Available</small>
+                        </div>
+                        <div class="icon-circle"><i class="bi bi-bandaid"></i></div>
+                    </div>
+                </div>
+            </div>
+        </th:block>
+
+        <div class="col-md-3">
+            <div class="card balance-card bg-light text-dark shadow-sm p-3 border h-100">
+                <div class="d-flex align-items-start">
+                    <i class="bi bi-shield-check text-success fs-3 me-3"></i>
+                    <div>
+                        <h6 class="fw-bold mb-1">Company Policy</h6>
+                        <small class="text-muted" style="font-size: 0.75rem;">Medical certificate required for >2 days sick leave. Leaves >3 days in past not allowed.</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div class="row">
-        <div class="col-md-5">
-            <div class="card mb-4">
-                <div class="card-header bg-white fw-bold">
-                    <i class="bi bi-plus-circle me-2"></i> Submit New Request
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-white fw-bold py-3">
+                    <i class="bi bi-send-plus-fill text-primary me-2"></i> Submit New Request
                 </div>
-                <div class="card-body p-4">
-                    <form th:action="@{/leave/request}" th:object="${leaveRequest}" method="POST">
+                <div class="card-body p-4 bg-light">
+                    <form th:action="@{/leave/request}" th:object="${leaveRequest}" method="POST" enctype="multipart/form-data">
+
                         <div class="mb-3">
-                            <label class="form-label">Start Date</label>
-                            <input type="date" th:field="*{startDate}" class="form-control" required>
+                            <label class="form-label fw-semibold text-secondary small">Leave Type</label>
+                            <select th:field="*{leaveType}" class="form-select shadow-sm" required onchange="toggleMedicalCertField(this)">
+                                <option value="" disabled selected>Select Category</option>
+                                <option value="ANNUAL">Annual Leave</option>
+                                <option value="CASUAL">Casual Leave</option>
+                                <option value="SICK">Sick Leave</option>
+                                <option value="UNPAID">Unpaid Leave</option>
+                            </select>
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">End Date</label>
-                            <input type="date" th:field="*{endDate}" class="form-control" required>
+                            <label class="form-label fw-semibold text-secondary small">Duration</label>
+                            <select th:field="*{duration}" class="form-select shadow-sm" required>
+                                <option value="FULL_DAY">Full Day</option>
+                                <option value="MORNING_HALF">Morning Half-Day (0.5)</option>
+                                <option value="AFTERNOON_HALF">Afternoon Half-Day (0.5)</option>
+                            </select>
                         </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Reason</label>
-                            <textarea th:field="*{reason}" class="form-control" rows="4" placeholder="Brief reason for leave..." required></textarea>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold text-secondary small">Start Date</label>
+                                <input type="date" th:field="*{startDate}" class="form-control shadow-sm" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold text-secondary small">End Date</label>
+                                <input type="date" th:field="*{endDate}" class="form-control shadow-sm" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-3" id="medicalCertDiv" style="display: none;">
+                            <label class="form-label fw-semibold text-secondary small">Medical Certificate (If > 2 days)</label>
+                            <input type="file" name="medicalCert" class="form-control shadow-sm" accept=".pdf,.jpg,.jpeg,.png">
+                            <small class="text-danger" style="font-size: 0.70rem;">*Required for sick leaves exceeding 2 working days.</small>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold text-secondary small">Reason for Leave</label>
+                            <textarea th:field="*{reason}" class="form-control shadow-sm" rows="3" placeholder="Briefly explain your reason..." required></textarea>
                         </div>
 
                         <div class="d-grid">
-                            <button type="submit" class="btn btn-primary">Submit Request</button>
+                            <button type="submit" class="btn btn-primary shadow-sm fw-bold">
+                                <i class="bi bi-check2-circle me-1"></i> Submit Request
+                            </button>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-7">
-            <div class="card">
-                <div class="card-header bg-white fw-bold">
-                    <i class="bi bi-clock-history me-2"></i> My Request History
+        <div class="col-md-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white fw-bold py-3">
+                    <i class="bi bi-clock-history text-primary me-2"></i> My Request History
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
                         <table class="table table-hover mb-0 align-middle">
                             <thead class="table-light">
                             <tr>
-                                <th>Period</th>
+                                <th class="ps-4">Leave Period</th>
+                                <th>Category & Duration</th>
                                 <th>Reason</th>
                                 <th>Status</th>
+                                <th>Action</th>
                             </tr>
                             </thead>
                             <tbody>
                             <tr th:if="${#lists.isEmpty(myLeaveRequests)}">
-                                <td colspan="3" class="text-center py-4 text-muted">You have no leave requests.</td>
+                                <td colspan="5" class="text-center py-5 text-muted">
+                                    <i class="bi bi-inbox fs-2 d-block mb-2 text-light"></i>
+                                    You have no leave requests on record.
+                                </td>
                             </tr>
                             <tr th:each="request : ${myLeaveRequests}">
-                                <td>
-                                    <div th:text="${request.startDate}"></div>
-                                    <small class="text-muted" th:text="${request.endDate}"></small>
+                                <td class="ps-4">
+                                    <div class="fw-bold text-dark" th:text="${request.startDate}"></div>
+                                    <small class="text-muted fw-semibold" th:if="${request.startDate != request.endDate}">
+                                        <i class="bi bi-arrow-return-right"></i> To: <span th:text="${request.endDate}"></span>
+                                    </small>
                                 </td>
-                                <td th:text="${request.reason}"></td>
                                 <td>
-                                    <span th:if="${request.status.name() == 'APPROVED'}" class="badge bg-success">Approved</span>
-                                    <span th:if="${request.status.name() == 'REJECTED'}" class="badge bg-danger">Rejected</span>
-                                    <span th:if="${request.status.name() == 'PENDING'}" class="badge bg-warning text-dark">Pending</span>
+                                    <span class="badge bg-secondary mb-1" th:text="${request.leaveType}"></span><br>
+                                    <small class="text-muted fw-bold" th:text="${request.duration}"></small>
+                                </td>
+                                <td>
+                                    <span class="text-truncate d-inline-block" style="max-width: 150px;" th:text="${request.reason}" th:title="${request.reason}"></span>
+                                    <br>
+                                    <a th:if="${request.medicalCertificatePath != null}" class="badge bg-info text-dark text-decoration-none mt-1" href="#" title="Medical Certificate Uploaded"><i class="bi bi-file-medical-fill"></i> Cert attached</a>
+                                </td>
+                                <td>
+                                    <span th:if="${request.status.name() == 'APPROVED'}" class="badge bg-success bg-opacity-10 text-success border border-success"><i class="bi bi-check-circle-fill me-1"></i> Approved</span>
+                                    <span th:if="${request.status.name() == 'REJECTED'}" class="badge bg-danger bg-opacity-10 text-danger border border-danger"><i class="bi bi-x-circle-fill me-1"></i> Rejected</span>
+                                    <span th:if="${request.status.name() == 'PENDING'}" class="badge bg-warning bg-opacity-10 text-warning border border-warning"><i class="bi bi-hourglass-split me-1"></i> Pending</span>
+                                </td>
+                                <td>
+                                    <form th:if="${request.status.name() == 'PENDING'}" th:action="@{/leave/cancel/{id}(id=${request.id})}" method="POST" class="m-0">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger shadow-sm">
+                                            <i class="bi bi-x-circle"></i> Cancel
+                                        </button>
+                                    </form>
+                                    <span th:if="${request.status.name() != 'PENDING'}" class="text-muted small">-</span>
                                 </td>
                             </tr>
                             </tbody>
@@ -80,6 +250,18 @@
             </div>
         </div>
     </div>
+
+    <script>
+        function toggleMedicalCertField(selectElement) {
+            var certDiv = document.getElementById("medicalCertDiv");
+            if (selectElement.value === "SICK") {
+                certDiv.style.display = "block";
+            } else {
+                certDiv.style.display = "none";
+            }
+        }
+    </script>
+
 </div>
 
 </body>

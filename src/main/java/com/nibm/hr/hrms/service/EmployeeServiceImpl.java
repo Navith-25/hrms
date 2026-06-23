@@ -51,6 +51,10 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     @Transactional
     public Employee createNewEmployee(NewEmployeeRequest request) {
+        if (request.isAdmin()) {
+            throw new RuntimeException("Action Denied: System already has a built-in Admin. You cannot create another Admin account.");
+        }
+
         Department department = departmentRepository.findById(request.getDepartmentId())
                 .orElseThrow(() -> new RuntimeException("Department not found"));
 
@@ -61,6 +65,20 @@ public class EmployeeServiceImpl implements EmployeeService {
         employee.setPosition(request.getPosition());
         employee.setHireDate(request.getHireDate());
         employee.setDepartment(department);
+
+        // Assign standard leave balances
+        double initialAnnual = 14.0;
+        double initialCasual = 7.0;
+        double initialSick = 14.0;
+
+        // Provide 5 additional annual leaves for Management/Director roles
+        if (request.isManager() || request.isHrManager() || request.isDirector()) {
+            initialAnnual = 19.0;
+        }
+
+        employee.setAnnualLeaveBalance(initialAnnual);
+        employee.setCasualLeaveBalance(initialCasual);
+        employee.setSickLeaveBalance(initialSick);
 
         User user = new User();
         user.setUsername(request.getUsername());

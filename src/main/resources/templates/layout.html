@@ -36,7 +36,8 @@
 
         <li class="menu-header">Self Service</li>
 
-        <li>
+        <!-- FIXED: Admin ta 'My Leave' menu eka hide kirima -->
+        <li sec:authorize="!hasRole('ADMIN')">
             <a th:href="@{/leave}" class="sidebar-link">
                 <i class="bi bi-briefcase-fill"></i> <span>My Leave</span>
             </a>
@@ -59,7 +60,7 @@
             </a>
         </li>
 
-        <li sec:authorize="!hasRole('ADMIN')">
+        <li>
             <a th:href="@{/loan/request}" class="sidebar-link">
                 <i class="bi bi-bank"></i> <span>Request Loan</span>
             </a>
@@ -104,9 +105,17 @@
                 </a>
             </li>
 
-            <li sec:authorize="hasAnyRole('ADMIN', 'HR_MANAGER', 'DIRECTOR', 'HR_STAFF')">
+            <!-- HR Manager & Staff see "All Leave Requests" -->
+            <li sec:authorize="hasAnyRole('HR_MANAGER', 'HR_STAFF')">
                 <a th:href="@{/admin/leave}" class="sidebar-link">
                     <i class="bi bi-building-check"></i> <span>All Leave Requests</span>
+                </a>
+            </li>
+
+            <!-- Director sees ONLY "Manager Leave Requests" -->
+            <li sec:authorize="hasRole('DIRECTOR')">
+                <a th:href="@{/admin/leave}" class="sidebar-link">
+                    <i class="bi bi-person-lines-fill"></i> <span>Manager Leave Requests</span>
                 </a>
             </li>
 

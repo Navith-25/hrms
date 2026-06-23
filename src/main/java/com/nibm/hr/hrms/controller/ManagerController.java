@@ -36,10 +36,18 @@ public class ManagerController {
         return "redirect:/manager/leave";
     }
 
+    // ==========================================
+    // FIXED: Routing to the shared template
+    // ==========================================
     @GetMapping("/manager/leave")
     public String showManagerLeavePage(Model model, Principal principal) {
         model.addAttribute("pendingRequests", leaveRequestService.getPendingRequestsForManager(principal));
-        return "manager_leave_approval";
+
+        // Meken HTML form actions tika auto /manager/leave/... walata map wenawa
+        model.addAttribute("postUrlPrefix", "/manager/leave");
+
+        // Parana 'manager_leave_approval' wenuwata aluth view certificate thiyena page eka return karanawa
+        return "admin_leave_approval";
     }
 
     @PostMapping("/manager/leave/approve/{id}")

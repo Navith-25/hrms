@@ -64,11 +64,15 @@ public class LoanService {
                     if (requester.getId().equals(approver.getId())) return false;
 
                     Set<String> reqRoles = requester.getRoles().stream().map(Role::getName).collect(Collectors.toSet());
+                    boolean reqIsAdmin = reqRoles.contains("ROLE_ADMIN"); // Aluthen add kala
                     boolean reqIsHrManager = reqRoles.contains("ROLE_HR_MANAGER");
                     boolean reqIsManager = reqRoles.contains("ROLE_MANAGER");
                     boolean reqInFinanceDept = reqEmployee.getDepartment() != null
                             && "Finance".equalsIgnoreCase(reqEmployee.getDepartment().getName());
                     boolean reqIsFinanceManager = reqIsManager && (reqRoles.contains("ROLE_FINANCE") || reqInFinanceDept);
+
+                    // Aluthen add kala: Admin ge loans director hari finance manager ta vitharai pennanne
+                    if (reqIsAdmin) return isDirector || isFinanceManager;
 
                     if (reqIsHrManager) return isDirector || isFinanceManager;
                     if (reqIsFinanceManager) return isDirector || isHrManager;
@@ -102,13 +106,17 @@ public class LoanService {
         boolean isFinanceStaff = isAppFinance || isAppFinanceDept;
 
         Set<String> reqRoles = requester.getRoles().stream().map(Role::getName).collect(Collectors.toSet());
+        boolean reqIsAdmin = reqRoles.contains("ROLE_ADMIN"); // Aluthen add kala
         boolean reqIsHrManager = reqRoles.contains("ROLE_HR_MANAGER");
         boolean reqIsManager = reqRoles.contains("ROLE_MANAGER");
         boolean reqInFinanceDept = reqEmployee.getDepartment() != null
                 && "Finance".equalsIgnoreCase(reqEmployee.getDepartment().getName());
         boolean reqIsFinanceManager = reqIsManager && (reqRoles.contains("ROLE_FINANCE") || reqInFinanceDept);
 
-        if (reqIsHrManager) {
+        // Aluthen add kala: Admin validation
+        if (reqIsAdmin) {
+            if (!isDirector && !isFinanceManager) throw new AccessDeniedException("Only CEO or Finance Manager can approve System Admin's loan.");
+        } else if (reqIsHrManager) {
             if (!isDirector && !isFinanceManager) throw new AccessDeniedException("Only CEO or Finance Manager can approve HR Manager.");
         } else if (reqIsFinanceManager) {
             if (!isDirector && !isHrManager) throw new AccessDeniedException("Only CEO or HR Manager can approve Finance Manager.");

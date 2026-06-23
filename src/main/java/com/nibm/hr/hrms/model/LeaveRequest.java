@@ -24,82 +24,60 @@ public class LeaveRequest {
     @Column(nullable = false)
     private String reason;
 
-    @Column(name = "leave_type")
-    private String leaveType;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "leave_type", nullable = false)
+    private LeaveType leaveType;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "duration", nullable = false)
+    private LeaveDuration duration;
 
     @Enumerated(EnumType.STRING)
     @Column(length = 20, nullable = false)
     private LeaveStatus status;
 
-    // --- Constructors ---
+    // ALUTHEN ADD KALA: Medical Certificate path eka save karanna
+    @Column(name = "medical_certificate_path")
+    private String medicalCertificatePath;
 
     public LeaveRequest() {
     }
 
-    public LeaveRequest(Employee employee, LocalDate startDate, LocalDate endDate, String reason, String leaveType, LeaveStatus status) {
+    public LeaveRequest(Employee employee, LocalDate startDate, LocalDate endDate, String reason, LeaveType leaveType, LeaveDuration duration, LeaveStatus status) {
         this.employee = employee;
         this.startDate = startDate;
         this.endDate = endDate;
         this.reason = reason;
         this.leaveType = leaveType;
+        this.duration = duration;
         this.status = status;
     }
 
-    // --- Getters and Setters ---
+    // Getters and Setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public Long getId() {
-        return id;
-    }
+    public Employee getEmployee() { return employee; }
+    public void setEmployee(Employee employee) { this.employee = employee; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public LocalDate getStartDate() { return startDate; }
+    public void setStartDate(LocalDate startDate) { this.startDate = startDate; }
 
-    public Employee getEmployee() {
-        return employee;
-    }
+    public LocalDate getEndDate() { return endDate; }
+    public void setEndDate(LocalDate endDate) { this.endDate = endDate; }
 
-    public void setEmployee(Employee employee) {
-        this.employee = employee;
-    }
+    public String getReason() { return reason; }
+    public void setReason(String reason) { this.reason = reason; }
 
-    public LocalDate getStartDate() {
-        return startDate;
-    }
+    public LeaveType getLeaveType() { return leaveType; }
+    public void setLeaveType(LeaveType leaveType) { this.leaveType = leaveType; }
 
-    public void setStartDate(LocalDate startDate) {
-        this.startDate = startDate;
-    }
+    public LeaveDuration getDuration() { return duration; }
+    public void setDuration(LeaveDuration duration) { this.duration = duration; }
 
-    public LocalDate getEndDate() {
-        return endDate;
-    }
+    public LeaveStatus getStatus() { return status; }
+    public void setStatus(LeaveStatus status) { this.status = status; }
 
-    public void setEndDate(LocalDate endDate) {
-        this.endDate = endDate;
-    }
-
-    public String getReason() {
-        return reason;
-    }
-
-    public void setReason(String reason) {
-        this.reason = reason;
-    }
-
-    public String getLeaveType() {
-        return leaveType;
-    }
-
-    public void setLeaveType(String leaveType) {
-        this.leaveType = leaveType;
-    }
-
-    public LeaveStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(LeaveStatus status) {
-        this.status = status;
-    }
+    public String getMedicalCertificatePath() { return medicalCertificatePath; }
+    public void setMedicalCertificatePath(String medicalCertificatePath) { this.medicalCertificatePath = medicalCertificatePath; }
 }

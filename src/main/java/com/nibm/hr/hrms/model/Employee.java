@@ -25,6 +25,16 @@ public class Employee {
 
     private LocalDate hireDate;
 
+    // Leave Balances with default standard values
+    @Column(nullable = false)
+    private double annualLeaveBalance = 14.0;
+
+    @Column(nullable = false)
+    private double casualLeaveBalance = 7.0;
+
+    @Column(nullable = false)
+    private double sickLeaveBalance = 14.0;
+
     @OneToOne(mappedBy = "employee", cascade = CascadeType.ALL)
     private User user;
 
@@ -58,6 +68,16 @@ public class Employee {
 
     public LocalDate getHireDate() { return hireDate; }
     public void setHireDate(LocalDate hireDate) { this.hireDate = hireDate; }
+
+    // Getters and Setters for Leave Balances
+    public double getAnnualLeaveBalance() { return annualLeaveBalance; }
+    public void setAnnualLeaveBalance(double annualLeaveBalance) { this.annualLeaveBalance = annualLeaveBalance; }
+
+    public double getCasualLeaveBalance() { return casualLeaveBalance; }
+    public void setCasualLeaveBalance(double casualLeaveBalance) { this.casualLeaveBalance = casualLeaveBalance; }
+
+    public double getSickLeaveBalance() { return sickLeaveBalance; }
+    public void setSickLeaveBalance(double sickLeaveBalance) { this.sickLeaveBalance = sickLeaveBalance; }
 
     public User getUser() { return user; }
     public void setUser(User user) { this.user = user; }

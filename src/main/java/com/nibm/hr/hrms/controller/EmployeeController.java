@@ -11,6 +11,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
 import java.util.Set;
@@ -49,16 +50,14 @@ public class EmployeeController {
     // --- 1. Leave Management ---
     @GetMapping("/leave")
     public String showLeavePage(Model model, Principal principal) {
+        // Pass the employee object to the view to display leave balances
+        model.addAttribute("employee", getEmployeeFromPrincipal(principal));
         model.addAttribute("myLeaveRequests", leaveRequestService.getMyLeaveRequests(principal));
         model.addAttribute("leaveRequest", new LeaveRequest());
         return "leave_request";
     }
 
-    @PostMapping("/leave/request")
-    public String submitLeaveRequest(@ModelAttribute("leaveRequest") LeaveRequest leaveRequest, Principal principal) {
-        leaveRequestService.createLeaveRequest(leaveRequest, principal);
-        return "redirect:/leave";
-    }
+    // (Submit Leave Request method eka LeaveController ekata shift karapu nisa methanin ain kala)
 
     // --- 2. Payslips ---
     @GetMapping("/payslips")
@@ -122,11 +121,16 @@ public class EmployeeController {
         return "new_employee";
     }
 
-    // --- Save New Employee ---
+    // --- Save New Employee (Updated with Error Handling) ---
     @PostMapping("/admin/employee/saveNew")
-    public String saveNewEmployee(@ModelAttribute("employeeRequest") NewEmployeeRequest request) {
-        employeeService.createNewEmployee(request);
-        return "redirect:/";
+    public String saveNewEmployee(@ModelAttribute("employeeRequest") NewEmployeeRequest request, RedirectAttributes redirectAttributes) {
+        try {
+            employeeService.createNewEmployee(request);
+            return "redirect:/";
+        } catch (RuntimeException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/showNewEmployeeForm";
+        }
     }
 
     // --- Show Form for Update ---
@@ -168,11 +172,16 @@ public class EmployeeController {
         return "update_employee";
     }
 
-    // --- Save Updated Employee ---
+    // --- Save Updated Employee (Updated with Error Handling) ---
     @PostMapping("/admin/employee/update")
-    public String updateEmployee(@ModelAttribute("employeeRequest") NewEmployeeRequest request) {
-        employeeService.updateEmployee(request);
-        return "redirect:/";
+    public String updateEmployee(@ModelAttribute("employeeRequest") NewEmployeeRequest request, RedirectAttributes redirectAttributes) {
+        try {
+            employeeService.updateEmployee(request);
+            return "redirect:/";
+        } catch (RuntimeException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/showFormForUpdate/" + request.getId();
+        }
     }
 
     // --- Delete Employee ---

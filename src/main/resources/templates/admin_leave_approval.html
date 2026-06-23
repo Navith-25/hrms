@@ -46,15 +46,21 @@
                         </td>
                         <td>
                             <p class="mb-0 small text-secondary" style="max-width: 300px;" th:text="${request.reason}"></p>
+                            <a th:if="${request.medicalCertificatePath != null}"
+                               th:href="@{'/leave/cert/' + ${request.medicalCertificatePath}}"
+                               target="_blank"
+                               class="badge bg-info text-dark text-decoration-none mt-2">
+                                <i class="bi bi-file-earmark-medical"></i> View Certificate
+                            </a>
                         </td>
                         <td class="text-end pe-4">
                             <div class="d-flex justify-content-end gap-2">
-                                <form th:action="@{/admin/leave/approve/{id}(id=${request.id})}" method="POST">
+                                <form th:action="@{${postUrlPrefix} + '/approve/' + ${request.id}}" method="POST">
                                     <button type="submit" class="btn btn-sm btn-success" title="Approve">
                                         <i class="bi bi-check-lg"></i> Approve
                                     </button>
                                 </form>
-                                <form th:action="@{/admin/leave/reject/{id}(id=${request.id})}" method="POST">
+                                <form th:action="@{${postUrlPrefix} + '/reject/' + ${request.id}}" method="POST">
                                     <button type="submit" class="btn btn-sm btn-danger" title="Reject">
                                         <i class="bi bi-x-lg"></i> Reject
                                     </button>

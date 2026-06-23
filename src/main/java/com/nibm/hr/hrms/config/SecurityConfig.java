@@ -31,8 +31,8 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(authorize -> authorize
-                        // 1. Static Resources & Login
-                        .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**", "/login", "/register").permitAll()
+                        // 1. Static Resources, Login & PUBLIC FILES (Medical Certs bypass Security)
+                        .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**", "/login", "/register", "/leave/cert/**").permitAll()
 
                         // 2. API Endpoints
                         .requestMatchers("/api/**").authenticated()
@@ -74,12 +74,7 @@ public class SecurityConfig {
                         .hasAnyRole("ADMIN", "HR_MANAGER", "DIRECTOR")
 
                         // 11. Admin Sub-Modules
-
-                        // FIXED: Performance Review Logic
-                        // Everyone allowed to SEE the reviews list (including Admin and HR Staff)
                         .requestMatchers("/admin/performance/list/**").hasAnyRole("ADMIN", "HR_MANAGER", "HR_STAFF", "DIRECTOR")
-
-                        // ONLY HR Manager and Director can CREATE/EDIT reviews (Admin and HR Staff are excluded)
                         .requestMatchers("/admin/performance/**").hasAnyRole("HR_MANAGER", "DIRECTOR")
 
                         .requestMatchers("/admin/payroll/**").hasAnyRole("ADMIN", "HR_MANAGER", "FINANCE", "DIRECTOR")
