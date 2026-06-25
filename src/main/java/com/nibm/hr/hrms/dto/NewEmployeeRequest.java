@@ -1,20 +1,37 @@
 package com.nibm.hr.hrms.dto;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
 
 public class NewEmployeeRequest {
 
     private Long id;
 
+    @NotBlank(message = "First name is required")
     private String firstName;
+
+    @NotBlank(message = "Last name is required")
     private String lastName;
+
+    @NotBlank(message = "Email is required")
+    @Email(message = "Please provide a valid email address")
     private String email;
+
+    @NotBlank(message = "Position is required")
     private String position;
+
+    @NotNull(message = "Hire date is required")
     private LocalDate hireDate;
+
+    @NotNull(message = "Please select a department")
     private Long departmentId;
 
+    @NotBlank(message = "Username is required")
+    @Size(min = 4, message = "Username must be at least 4 characters long")
     private String username;
-    private String password;
 
     private boolean isManager;
     private boolean isHrManager;
@@ -23,6 +40,7 @@ public class NewEmployeeRequest {
     private boolean isDirector;
     private boolean isAdmin;
 
+    // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -46,9 +64,6 @@ public class NewEmployeeRequest {
 
     public String getUsername() { return username; }
     public void setUsername(String username) { this.username = username; }
-
-    public String getPassword() { return password; }
-    public void setPassword(String password) { this.password = password; }
 
     public boolean isManager() { return isManager; }
     public void setManager(boolean manager) { isManager = manager; }

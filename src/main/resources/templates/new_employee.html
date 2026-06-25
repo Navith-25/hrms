@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
       layout:decorate="~{layout}">
 <head>
     <title>Add New Employee</title>
@@ -14,13 +15,11 @@
             <a th:href="@{/}" class="btn btn-outline-secondary">Back to List</a>
         </div>
 
-        <!-- ALUTHEN ADD KARAPU ALERT EKA (Error ekak aawoth meka watenawa) -->
         <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
             <i class="bi bi-exclamation-triangle-fill me-2"></i>
             <span th:text="${errorMessage}"></span>
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
-        <!-- ============================== -->
 
         <div class="card">
             <div class="card-body p-4">
@@ -30,30 +29,36 @@
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label class="form-label">First Name</label>
-                            <input type="text" th:field="*{firstName}" class="form-control" required>
+                            <input type="text" th:field="*{firstName}" class="form-control" th:classappend="${#fields.hasErrors('firstName')} ? 'is-invalid' : ''">
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}"></div>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Last Name</label>
-                            <input type="text" th:field="*{lastName}" class="form-control">
+                            <input type="text" th:field="*{lastName}" class="form-control" th:classappend="${#fields.hasErrors('lastName')} ? 'is-invalid' : ''">
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"></div>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Email</label>
-                            <input type="email" th:field="*{email}" class="form-control" required>
+                            <input type="email" th:field="*{email}" class="form-control" th:classappend="${#fields.hasErrors('email')} ? 'is-invalid' : ''">
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Hire Date</label>
-                            <input type="date" th:field="*{hireDate}" class="form-control">
+                            <input type="date" th:field="*{hireDate}" class="form-control" th:classappend="${#fields.hasErrors('hireDate')} ? 'is-invalid' : ''">
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('hireDate')}" th:errors="*{hireDate}"></div>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Department</label>
-                            <select th:field="*{departmentId}" class="form-select" required>
+                            <select th:field="*{departmentId}" class="form-select" th:classappend="${#fields.hasErrors('departmentId')} ? 'is-invalid' : ''">
                                 <option value="">Select Department...</option>
                                 <option th:each="dept : ${allDepartments}" th:value="${dept.id}" th:text="${dept.name}"></option>
                             </select>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('departmentId')}" th:errors="*{departmentId}"></div>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Position</label>
-                            <input type="text" th:field="*{position}" class="form-control">
+                            <input type="text" th:field="*{position}" class="form-control" th:classappend="${#fields.hasErrors('position')} ? 'is-invalid' : ''">
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('position')}" th:errors="*{position}"></div>
                         </div>
                     </div>
 
@@ -61,13 +66,11 @@
 
                     <h5 class="text-primary mb-3">Account Setup</h5>
                     <div class="row g-3">
-                        <div class="col-md-6">
+                        <div class="col-md-12">
                             <label class="form-label">Username</label>
-                            <input type="text" th:field="*{username}" class="form-control" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Temporary Password</label>
-                            <input type="password" th:field="*{password}" class="form-control" required>
+                            <input type="text" th:field="*{username}" class="form-control" th:classappend="${#fields.hasErrors('username')} ? 'is-invalid' : ''">
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></div>
+                            <div class="form-text text-muted" th:if="${!#fields.hasErrors('username')}">A temporary password will be automatically generated and emailed to the user upon admin approval.</div>
                         </div>
                     </div>
 
@@ -90,7 +93,11 @@
                                 <input class="form-check-input" type="checkbox" id="roleFinance" th:field="*{finance}">
                                 <label class="form-check-label" for="roleFinance">Finance</label>
                             </div>
-                            <!-- Admin checkbox eka me thanin ain karala damma -->
+
+                            <div class="form-check" th:if="${#authorization.expression('hasRole(''ROLE_ADMIN'')')}">
+                                <input class="form-check-input" type="checkbox" id="roleAdmin" th:field="*{admin}">
+                                <label class="form-check-label text-danger fw-bold" for="roleAdmin">System Admin</label>
+                            </div>
                         </div>
                     </div>
 

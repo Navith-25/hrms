@@ -31,8 +31,8 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(authorize -> authorize
-                        // 1. Static Resources, Login & PUBLIC FILES (Medical Certs bypass Security)
-                        .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**", "/login", "/register", "/leave/cert/**").permitAll()
+                        // 1. Static Resources, Login & PUBLIC FILES (Added profile-pics bypass)
+                        .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**", "/login", "/register", "/leave/cert/**", "/profile-pics/**").permitAll()
 
                         // 2. API Endpoints
                         .requestMatchers("/api/**").authenticated()
@@ -57,26 +57,23 @@ public class SecurityConfig {
                         // 8. Training Module
                         .requestMatchers("/admin/training/**").hasRole("DIRECTOR")
                         .requestMatchers("/manager/training/**").hasAnyRole("MANAGER", "HR_MANAGER")
-
-                        // My Trainings
                         .requestMatchers("/employee/trainings").hasRole("EMPLOYEE")
 
                         // 9. Specific GET Rules
                         .requestMatchers(HttpMethod.GET, "/showNewEmployeeForm", "/showFormForUpdate/**")
-                        .hasAnyRole("HR_STAFF", "ADMIN", "HR_MANAGER", "DIRECTOR")
+                        .hasAnyRole("HR_STAFF", "ADMIN", "HR_MANAGER")
                         .requestMatchers(HttpMethod.GET, "/admin/leave")
                         .hasAnyRole("HR_STAFF", "ADMIN", "HR_MANAGER", "DIRECTOR")
 
                         // 10. Admin Actions
                         .requestMatchers(HttpMethod.POST, "/admin/employee/saveNew", "/admin/employee/update")
-                        .hasAnyRole("ADMIN", "HR_MANAGER", "HR_STAFF", "DIRECTOR")
+                        .hasAnyRole("ADMIN", "HR_MANAGER", "HR_STAFF")
                         .requestMatchers(HttpMethod.POST, "/deleteEmployee/**")
-                        .hasAnyRole("ADMIN", "HR_MANAGER", "DIRECTOR")
+                        .hasAnyRole("ADMIN", "HR_MANAGER")
 
                         // 11. Admin Sub-Modules
                         .requestMatchers("/admin/performance/list/**").hasAnyRole("ADMIN", "HR_MANAGER", "HR_STAFF", "DIRECTOR")
                         .requestMatchers("/admin/performance/**").hasAnyRole("HR_MANAGER", "DIRECTOR")
-
                         .requestMatchers("/admin/payroll/**").hasAnyRole("ADMIN", "HR_MANAGER", "FINANCE", "DIRECTOR")
                         .requestMatchers("/admin/leave/**").hasAnyRole("ADMIN", "HR_MANAGER", "HR_STAFF", "DIRECTOR")
                         .requestMatchers("/admin/reports/**", "/admin/report/**").hasAnyRole("ADMIN", "DIRECTOR")
@@ -86,12 +83,9 @@ public class SecurityConfig {
                         .requestMatchers("/manager/team", "/manager/leave", "/manager/performance/**").hasAnyRole("MANAGER", "HR_MANAGER")
                         .requestMatchers(HttpMethod.POST, "/manager/leave/approve/**", "/manager/leave/reject/**").hasAnyRole("MANAGER", "HR_MANAGER")
 
-                        // Personal Essentials
-                        .requestMatchers("/leave", "/leave/request", "/payslips", "/performance").authenticated()
-
-                        // My Tasks
+                        // Personal Essentials (Added /my-profile)
+                        .requestMatchers("/leave", "/leave/request", "/payslips", "/performance", "/my-profile/**").authenticated()
                         .requestMatchers("/employee/tasks/**").hasRole("EMPLOYEE")
-
                         .requestMatchers(HttpMethod.GET, "/payslip/{id}").hasAnyRole("EMPLOYEE", "ADMIN", "HR_MANAGER", "DIRECTOR", "FINANCE", "MANAGER", "HR_STAFF")
 
                         // 13. General Catch-All

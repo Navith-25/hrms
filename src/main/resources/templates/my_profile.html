@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>My Profile</title>
+</head>
+<body>
+
+<div layout:fragment="content">
+
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i> <span th:text="${successMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i> <span th:text="${errorMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-bold text-primary"><i class="bi bi-person-lines-fill me-2"></i> Profile Details</h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="me-4">
+                            <div th:if="${employee.profilePhoto == null}" class="bg-light rounded-circle d-flex justify-content-center align-items-center border" style="width: 100px; height: 100px; font-size: 36px; color: #4f46e5;">
+                                <span th:text="${#strings.substring(employee.firstName,0,1)}"></span>
+                            </div>
+                            <img th:if="${employee.profilePhoto != null}" th:src="@{'/profile-pics/' + ${employee.profilePhoto}}" class="rounded-circle border" style="width: 100px; height: 100px; object-fit: cover;" alt="Profile Photo">
+                        </div>
+                        <div>
+                            <h4 class="fw-bold mb-1" th:text="${employee.firstName + ' ' + employee.lastName}">Name</h4>
+                            <p class="text-muted mb-0"><i class="bi bi-briefcase me-1"></i> <span th:text="${employee.position}">Position</span> | <span th:text="${employee.department != null ? employee.department.name : 'No Department'}"></span></p>
+                            <p class="text-muted small mt-1"><i class="bi bi-envelope me-1"></i> <span th:text="${employee.email}"></span></p>
+                        </div>
+                    </div>
+
+                    <form th:action="@{/my-profile/update}" method="POST" enctype="multipart/form-data">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label text-muted small">Phone Number</label>
+                                <input type="text" name="phone" class="form-control" th:value="${employee.phone}" placeholder="Enter your contact number">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label text-muted small">Date of Birth</label>
+                                <input type="date" name="dob" class="form-control" th:value="${employee.dob}">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label text-muted small">Home Address</label>
+                                <textarea name="address" class="form-control" rows="2" th:text="${employee.address}" placeholder="Enter your residential address"></textarea>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label text-muted small">Upload/Change Profile Photo</label>
+                                <input type="file" name="profileImage" class="form-control"
+                                       accept="image/png, image/jpeg, image/jpg"
+                                       onchange="if(this.files[0].size > 5242880) { alert('File is too large! Please select an image under 5MB.'); this.value=''; }">
+                                <div class="form-text">Max size: 2MB. Format: JPG or PNG.</div>
+                            </div>
+                        </div>
+                        <div class="mt-4 text-end">
+                            <button type="submit" class="btn btn-primary px-4"><i class="bi bi-save me-1"></i> Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-bold text-danger"><i class="bi bi-shield-lock me-2"></i> Change Password</h5>
+                </div>
+                <div class="card-body p-4">
+                    <p class="text-muted small mb-4">Ensure your account is using a long, random password to stay secure.</p>
+
+                    <form th:action="@{/my-profile/change-password}" method="POST">
+                        <div class="mb-3">
+                            <label class="form-label">Current Password</label>
+                            <input type="password" name="oldPassword" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">New Password</label>
+                            <input type="password" name="newPassword" class="form-control" required minlength="6">
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label">Confirm New Password</label>
+                            <input type="password" name="confirmPassword" class="form-control" required minlength="6">
+                        </div>
+                        <button type="submit" class="btn btn-danger w-100"><i class="bi bi-key me-1"></i> Update Password</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

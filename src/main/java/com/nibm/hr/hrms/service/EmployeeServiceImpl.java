@@ -10,6 +10,12 @@ import com.nibm.hr.hrms.repository.EmployeeRepository;
 import com.nibm.hr.hrms.repository.RoleRepository;
 import com.nibm.hr.hrms.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,24 +24,19 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class EmployeeServiceImpl implements EmployeeService {
 
-    @Autowired
-    private EmployeeRepository employeeRepository;
+    @Autowired private EmployeeRepository employeeRepository;
+    @Autowired private UserRepository userRepository;
+    @Autowired private DepartmentRepository departmentRepository;
+    @Autowired private RoleRepository roleRepository;
+    @Autowired private PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private DepartmentRepository departmentRepository;
-
-    @Autowired
-    private RoleRepository roleRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    @Autowired private EmailService emailService;
 
     @Override
     public Employee getEmployeeByUsername(String username) {
@@ -49,14 +50,70 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
+    public List<Employee> getPendingEmployees() {
+        return employeeRepository.findAll().stream()
+                .filter(e -> e.getUser() != null && !e.getUser().isEnabled())
+                .collect(Collectors.toList());
+    }
+
+    // =====================================
+    // 100% UPDATED: APPROVE WITH AUTO PASSWORD & EMAIL
+    // =====================================
+    @Override
+    @Transactional
+    public void approveEmployee(Long id) {
+        Employee employee = getEmployeeById(id);
+        User user = employee.getUser();
+
+        if (user != null) {
+            String tempPassword = UUID.randomUUID().toString().substring(0, 8) + "-HRMS";
+
+            user.setPassword(passwordEncoder.encode(tempPassword));
+            user.setEnabled(true);
+            userRepository.save(user);
+
+            emailService.sendWelcomeEmail(employee.getEmail(), employee.getFirstName(), user.getUsername(), tempPassword);
+        } else {
+            throw new RuntimeException("Cannot approve: No user account found for this employee.");
+        }
+    }
+
+    @Override
+    @Transactional
+    public void rejectEmployee(Long id) {
+        Employee employee = getEmployeeById(id);
+        User user = employee.getUser();
+        if (user != null && !user.isEnabled()) {
+            userRepository.delete(user);
+        } else {
+            throw new RuntimeException("Cannot reject: Employee is already active or has no account.");
+        }
+    }
+
+    @Override
+    @Transactional
+    public void changePassword(String username, String oldPassword, String newPassword) {
+        User user = userRepository.findByUsername(username);
+        if (user == null) throw new RuntimeException("User account not found.");
+        if (!passwordEncoder.matches(oldPassword, user.getPassword())) throw new RuntimeException("Current password is incorrect.");
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+    }
+
+    // =====================================
+    // UPDATED: CREATE ACCOUNT WITHOUT PASSWORD
+    // =====================================
+    @Override
     @Transactional
     public Employee createNewEmployee(NewEmployeeRequest request) {
-        if (request.isAdmin()) {
-            throw new RuntimeException("Action Denied: System already has a built-in Admin. You cannot create another Admin account.");
-        }
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        boolean isCurrentUserAdmin = auth != null && auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
 
-        Department department = departmentRepository.findById(request.getDepartmentId())
-                .orElseThrow(() -> new RuntimeException("Department not found"));
+        if (request.isAdmin() && !isCurrentUserAdmin) throw new RuntimeException("Security Alert: Only existing Administrators can assign the Admin role.");
+        if (userRepository.findByUsername(request.getUsername()) != null) throw new RuntimeException("Username '" + request.getUsername() + "' is already taken.");
+        if (employeeRepository.findAll().stream().anyMatch(e -> e.getEmail().equalsIgnoreCase(request.getEmail()))) throw new RuntimeException("Email '" + request.getEmail() + "' is already registered in the system.");
+
+        Department department = departmentRepository.findById(request.getDepartmentId()).orElseThrow(() -> new RuntimeException("Department not found"));
 
         Employee employee = new Employee();
         employee.setFirstName(request.getFirstName());
@@ -66,57 +123,32 @@ public class EmployeeServiceImpl implements EmployeeService {
         employee.setHireDate(request.getHireDate());
         employee.setDepartment(department);
 
-        // Assign standard leave balances
-        double initialAnnual = 14.0;
-        double initialCasual = 7.0;
-        double initialSick = 14.0;
-
-        // Provide 5 additional annual leaves for Management/Director roles
-        if (request.isManager() || request.isHrManager() || request.isDirector()) {
-            initialAnnual = 19.0;
-        }
-
+        double initialAnnual = (request.isManager() || request.isHrManager() || request.isDirector()) ? 19.0 : 14.0;
         employee.setAnnualLeaveBalance(initialAnnual);
-        employee.setCasualLeaveBalance(initialCasual);
-        employee.setSickLeaveBalance(initialSick);
+        employee.setCasualLeaveBalance(7.0);
+        employee.setSickLeaveBalance(14.0);
 
         User user = new User();
         user.setUsername(request.getUsername());
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setEnabled(true);
+        user.setPassword(passwordEncoder.encode(UUID.randomUUID().toString()));
+        user.setEnabled(false);
 
         Set<Role> roles = new HashSet<>();
         roles.add(findRoleByName("ROLE_EMPLOYEE"));
 
-        if (request.isManager()) {
-            roles.add(findRoleByName("ROLE_MANAGER"));
-            department.setManager(employee);
-        }
-        if (request.isHrManager()) {
-            roles.add(findRoleByName("ROLE_HR_MANAGER"));
-        }
-        if (request.isHrStaff()) {
-            roles.add(findRoleByName("ROLE_HR_STAFF"));
-        }
-        if (request.isFinance()) {
-            roles.add(findRoleByName("ROLE_FINANCE"));
-        }
-        if (request.isDirector()) {
-            roles.add(findRoleByName("ROLE_DIRECTOR"));
-        }
-        if (request.isAdmin()) {
-            roles.add(findRoleByName("ROLE_ADMIN"));
-        }
+        if (request.isManager()) { roles.add(findRoleByName("ROLE_MANAGER")); department.setManager(employee); }
+        if (request.isHrManager()) roles.add(findRoleByName("ROLE_HR_MANAGER"));
+        if (request.isHrStaff()) roles.add(findRoleByName("ROLE_HR_STAFF"));
+        if (request.isFinance()) roles.add(findRoleByName("ROLE_FINANCE"));
+        if (request.isDirector()) roles.add(findRoleByName("ROLE_DIRECTOR"));
+        if (request.isAdmin()) roles.add(findRoleByName("ROLE_ADMIN"));
 
         user.setRoles(roles);
         user.setEmployee(employee);
         employee.setUser(user);
 
         userRepository.save(user);
-
-        if (request.isManager()) {
-            departmentRepository.save(department);
-        }
+        if (request.isManager()) departmentRepository.save(department);
 
         return employee;
     }
@@ -124,15 +156,21 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     @Transactional
     public Employee updateEmployee(NewEmployeeRequest request) {
-        Employee employee = employeeRepository.findById(request.getId())
-                .orElseThrow(() -> new RuntimeException("Employee not found for id :: " + request.getId()));
+        Employee employee = employeeRepository.findById(request.getId()).orElseThrow(() -> new RuntimeException("Employee not found"));
         User user = employee.getUser();
-        if (user == null) {
-            throw new RuntimeException("User not found for employee :: " + employee.getFirstName());
-        }
+        if (user == null) throw new RuntimeException("User not found");
 
-        Department department = departmentRepository.findById(request.getDepartmentId())
-                .orElseThrow(() -> new RuntimeException("Department not found"));
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        boolean isCurrentUserAdmin = auth != null && auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        if (request.isAdmin() && !isCurrentUserAdmin) throw new RuntimeException("Security Alert: Only existing Administrators can assign the Admin role.");
+
+        User existingUser = userRepository.findByUsername(request.getUsername());
+        if (existingUser != null && !existingUser.getId().equals(user.getId())) throw new RuntimeException("Username '" + request.getUsername() + "' is already taken.");
+
+        boolean emailExists = employeeRepository.findAll().stream().anyMatch(e -> e.getEmail().equalsIgnoreCase(request.getEmail()) && !e.getId().equals(employee.getId()));
+        if (emailExists) throw new RuntimeException("Email '" + request.getEmail() + "' is already registered by another user.");
+
+        Department department = departmentRepository.findById(request.getDepartmentId()).orElseThrow(() -> new RuntimeException("Department not found"));
 
         employee.setFirstName(request.getFirstName());
         employee.setLastName(request.getLastName());
@@ -141,8 +179,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         employee.setHireDate(request.getHireDate());
 
         if (!employee.getDepartment().getId().equals(department.getId())) {
-            if (employee.getDepartment().getManager() != null &&
-                    employee.getDepartment().getManager().getId().equals(employee.getId())) {
+            if (employee.getDepartment().getManager() != null && employee.getDepartment().getManager().getId().equals(employee.getId())) {
                 employee.getDepartment().setManager(null);
                 departmentRepository.save(employee.getDepartment());
             }
@@ -163,21 +200,11 @@ public class EmployeeServiceImpl implements EmployeeService {
             }
         }
 
-        if (request.isHrManager()) {
-            roles.add(findRoleByName("ROLE_HR_MANAGER"));
-        }
-        if (request.isHrStaff()) {
-            roles.add(findRoleByName("ROLE_HR_STAFF"));
-        }
-        if (request.isFinance()) {
-            roles.add(findRoleByName("ROLE_FINANCE"));
-        }
-        if (request.isDirector()) {
-            roles.add(findRoleByName("ROLE_DIRECTOR"));
-        }
-        if (request.isAdmin()) {
-            roles.add(findRoleByName("ROLE_ADMIN"));
-        }
+        if (request.isHrManager()) roles.add(findRoleByName("ROLE_HR_MANAGER"));
+        if (request.isHrStaff()) roles.add(findRoleByName("ROLE_HR_STAFF"));
+        if (request.isFinance()) roles.add(findRoleByName("ROLE_FINANCE"));
+        if (request.isDirector()) roles.add(findRoleByName("ROLE_DIRECTOR"));
+        if (request.isAdmin()) roles.add(findRoleByName("ROLE_ADMIN"));
 
         user.setRoles(roles);
         userRepository.save(user);
@@ -196,19 +223,13 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public Employee getEmployeeById(Long id) {
-        Optional<Employee> optional = employeeRepository.findById(id);
-        if (optional.isPresent()) {
-            return optional.get();
-        } else {
-            throw new RuntimeException("Employee not found for id :: " + id);
-        }
+        return employeeRepository.findById(id).orElseThrow(() -> new RuntimeException("Employee not found for id :: " + id));
     }
 
     @Override
     @Transactional
     public void deleteEmployeeById(Long id) {
         Employee employee = getEmployeeById(id);
-
         Optional<Department> managedDept = departmentRepository.findByManager(employee);
         if (managedDept.isPresent()) {
             Department dept = managedDept.get();
@@ -217,9 +238,18 @@ public class EmployeeServiceImpl implements EmployeeService {
         }
         User user = employee.getUser();
         if (user != null) {
-            userRepository.delete(user);
-        } else {
-            this.employeeRepository.delete(employee);
+            user.setEnabled(false);
+            userRepository.save(user);
         }
+    }
+
+    @Override
+    public Page<Employee> findPaginated(int pageNo, int pageSize, String sortField, String sortDir, String keyword) {
+        Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortField).ascending() : Sort.by(sortField).descending();
+        Pageable pageable = PageRequest.of(pageNo - 1, pageSize, sort);
+        if (keyword != null && !keyword.isEmpty()) {
+            return employeeRepository.searchEmployees(keyword, pageable);
+        }
+        return employeeRepository.findAll(pageable);
     }
 }

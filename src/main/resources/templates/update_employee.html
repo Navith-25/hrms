@@ -9,6 +9,13 @@
 
 <div layout:fragment="content">
     <div class="container" style="max-width: 900px;">
+
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            <span th:text="${errorMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
         <div class="card">
             <div class="card-header bg-white py-3">
                 <h4 class="mb-0 fw-bold">Update Employee Profile</h4>
@@ -21,30 +28,36 @@
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label class="form-label">First Name</label>
-                            <input type="text" th:field="*{firstName}" class="form-control" required>
+                            <input type="text" th:field="*{firstName}" class="form-control" th:classappend="${#fields.hasErrors('firstName')} ? 'is-invalid' : ''">
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}"></div>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Last Name</label>
-                            <input type="text" th:field="*{lastName}" class="form-control">
+                            <input type="text" th:field="*{lastName}" class="form-control" th:classappend="${#fields.hasErrors('lastName')} ? 'is-invalid' : ''">
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"></div>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Email Address</label>
-                            <input type="email" th:field="*{email}" class="form-control" required>
+                            <input type="email" th:field="*{email}" class="form-control" th:classappend="${#fields.hasErrors('email')} ? 'is-invalid' : ''">
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Position / Job Title</label>
-                            <input type="text" th:field="*{position}" class="form-control">
+                            <input type="text" th:field="*{position}" class="form-control" th:classappend="${#fields.hasErrors('position')} ? 'is-invalid' : ''">
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('position')}" th:errors="*{position}"></div>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Hire Date</label>
-                            <input type="date" th:field="*{hireDate}" class="form-control">
+                            <input type="date" th:field="*{hireDate}" class="form-control" th:classappend="${#fields.hasErrors('hireDate')} ? 'is-invalid' : ''">
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('hireDate')}" th:errors="*{hireDate}"></div>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Department</label>
-                            <select th:field="*{departmentId}" class="form-select" required>
+                            <select th:field="*{departmentId}" class="form-select" th:classappend="${#fields.hasErrors('departmentId')} ? 'is-invalid' : ''">
                                 <option value="">Select Department...</option>
                                 <option th:each="dept : ${allDepartments}" th:value="${dept.id}" th:text="${dept.name}"></option>
                             </select>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('departmentId')}" th:errors="*{departmentId}"></div>
                         </div>
                     </div>
 
@@ -52,14 +65,9 @@
 
                     <h5 class="text-primary mb-3">System Access & Roles</h5>
                     <div class="row mb-3">
-                        <div class="col-md-6">
+                        <div class="col-md-12">
                             <label class="form-label">Username (Read-Only)</label>
                             <input type="text" th:field="*{username}" class="form-control bg-light" readonly>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Password (Encrypted)</label>
-                            <input type="password" value="********" class="form-control bg-light" readonly>
-                            <input type="hidden" th:field="*{password}">
                         </div>
                     </div>
 
